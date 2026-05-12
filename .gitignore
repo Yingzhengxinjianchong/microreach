@@ -1,0 +1,22 @@
+# 虚拟环境
+venv/
+.venv/
+
+# Python 编译缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 数据文件（用 Git LFS 管理，不走普通 git）
+data/*.npz
+
+# 可视化输出
+*.png
+*.jpg
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+logs/
