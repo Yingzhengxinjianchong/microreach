@@ -1,0 +1,14 @@
+Auto-selected instances for polar visualization
+============================================================
+01. instance=912  inst_mean=0.1956  inst_nonzero=34.2%  best_cand=2  cand_score=0.8924  total_score=0.9039
+02. instance=1280  inst_mean=0.1806  inst_nonzero=31.7%  best_cand=8  cand_score=0.8764  total_score=0.8973
+03. instance=866  inst_mean=0.1571  inst_nonzero=28.3%  best_cand=7  cand_score=0.9002  total_score=0.8870
+04. instance=862  inst_mean=0.1219  inst_nonzero=21.2%  best_cand=4  cand_score=0.9600  total_score=0.8823
+05. instance=1011  inst_mean=0.1143  inst_nonzero=20.4%  best_cand=4  cand_score=0.9658  total_score=0.8779
+
+Saved figures:
+data/polar_figs_auto/01_912_cand2_polar.png
+data/polar_figs_auto/02_1280_cand8_polar.png
+data/polar_figs_auto/03_866_cand7_polar.png
+data/polar_figs_auto/04_862_cand4_polar.png
+data/polar_figs_auto/05_1011_cand4_polar.png
