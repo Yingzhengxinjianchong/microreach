@@ -1,0 +1,20 @@
+# M1: 带 pose decoder + 单层 R_geom
+# 验证目标：相对 M0 提升 → pose-condition 有效
+# 标签：完整 (M, 24) R_geom 张量
+# 继承 default.yaml
+
+_base_: default.yaml
+
+variant: m1
+
+model:
+  use_pose_decoder: true            # 关键：相对 M0 唯一不同
+                                    # （default 已经是 true，这里显式写出方便对比）
+
+target_mode: per_query              # GT 直接用 (M, 24) R_geom
+
+train:
+  ckpt_dir: ckpts/m1_seed42
+
+wandb:
+  run_name: gjw_m1_seed42
