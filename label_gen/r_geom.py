@@ -329,6 +329,66 @@ def solve_ik(
 
     return None   # IK 失败
 
+def solve_ik_position_only(
+    controller:   RobotController,
+    target_pos:   np.ndarray,
+    init_qpos:    Optional[np.ndarray] = None,
+    pos_tol:      float = 0.03,
+    max_iter:     int = 120,
+) -> Optional[np.ndarray]:
+    """
+    Position-only IK fallback。
+
+    用途：
+        原 solve_ik() 同时约束位置 + 姿态，在当前 query 方向/物体尺度下容易全部失败。
+        这里仅要求末端位置接近 target_pos，用于避免 R_geom 全 0 退化。
+
+    Args:
+        controller: RobotController
+        target_pos: (3,) 目标末端位置
+        init_qpos:  初始关节角
+        pos_tol:    位置容差。当前 PartNet-Mobility 坐标近似归一化，不宜用 1mm。
+        max_iter:   最大迭代次数
+
+    Returns:
+        qpos: (7,) IK 解，或 None
+    """
+    qpos = (
+        init_qpos.copy()
+        if init_qpos is not None
+        else controller.neutral_qpos.copy()
+    )
+
+    for _iter in range(max_iter):
+        cur_pos, _cur_rot = controller.forward_kinematics(qpos)
+        pos_err = target_pos - cur_pos
+
+        if np.linalg.norm(pos_err) < pos_tol:
+            return qpos
+
+        J = controller.compute_jacobian(qpos)
+        J_pos = J[:3, :]  # 只用位置 Jacobian，shape=(3,7)
+
+        JJT = J_pos @ J_pos.T
+        damp_mat = IK_DAMP * np.eye(3, dtype=np.float32)
+
+        try:
+            dq = IK_LR * J_pos.T @ np.linalg.solve(JJT + damp_mat, pos_err)
+        except np.linalg.LinAlgError:
+            return None
+
+        qpos = np.clip(
+            qpos + dq,
+            controller.joint_limits[:, 0],
+            controller.joint_limits[:, 1],
+        )
+
+    # 最终再宽松检查一次
+    cur_pos, _cur_rot = controller.forward_kinematics(qpos)
+    if np.linalg.norm(target_pos - cur_pos) < pos_tol * 2:
+        return qpos
+
+    return None
 
 # ──────────────────────────────────────────────
 # 软约束计算
@@ -502,6 +562,190 @@ def fill_r_geom_for_instance(
 
     return npz_path
 
+# ──────────────────────────────────────────────
+# batch_generate.py 兼容接口
+# ──────────────────────────────────────────────
+
+def batch_compute_r_geom(
+    candidate_p: np.ndarray,
+    queries: np.ndarray,
+    urdf_path: str,
+    instance_id: str = "",
+    robot_urdf: Optional[str] = None,
+) -> np.ndarray:
+    """
+    批量计算单个实例的 R_geom，与 batch_generate.py 接口对齐。
+
+    调试版：
+        会统计 IK 失败、碰撞失败、正样本数量。
+        这样可以判断 R_geom 全 0 到底是哪一步导致的。
+    """
+    from label_gen.sapien_loader import init_sapien, load_urdf
+
+    if robot_urdf is None:
+        robot_urdf = str(_PROJECT_ROOT / "assets" / "franka" / "panda.urdf")
+
+    if not os.path.exists(robot_urdf):
+        raise FileNotFoundError(
+            f"Franka Panda URDF 未找到: {robot_urdf}\n"
+            "请确认 assets/franka/panda.urdf 已存在。"
+        )
+
+    urdf_path = str(urdf_path)
+    if not os.path.exists(urdf_path):
+        raise FileNotFoundError(f"实例 URDF 未找到: {urdf_path}")
+
+    print(f"[r_geom debug] instance={instance_id}")
+    print(f"[r_geom debug] candidate_p shape={candidate_p.shape}")
+    print(f"[r_geom debug] candidate min={candidate_p.min(axis=0)}, max={candidate_p.max(axis=0)}")
+
+    # 初始化 SAPIEN scene，并加载当前物体
+    engine, renderer, scene = init_sapien(headless=True)
+    load_urdf(scene, urdf_path)
+
+    # 加载 Franka Panda
+    controller = RobotController(scene, robot_urdf)
+
+    # 自动把 Panda 底座放到候选点云旁边。
+    #
+    # 当前 PartNet-Mobility 物体坐标是归一化坐标，很多候选点 z 为负；
+    # 如果 Franka 默认放在世界原点，IK 很容易全部失败。
+    #
+    # 这里把机器人放在候选点云 x 负方向一侧，并把底座 z 降低，
+    # 让候选点落在 Panda 常见工作空间内。
+    import sapien.core as sapien
+
+    cand_center = np.median(candidate_p, axis=0)
+    cand_min = candidate_p.min(axis=0)
+    cand_max = candidate_p.max(axis=0)
+
+    robot_base_pos = np.array([
+        cand_center[0] - 0.65,   # 站在物体 x 负方向一侧
+        cand_center[1],          # y 与候选点中心对齐
+        cand_min[2] - 0.55,      # 底座低于候选点，让负 z 目标可达
+    ], dtype=np.float32)
+
+    controller.robot.set_root_pose(
+        sapien.Pose(p=robot_base_pos.tolist())
+    )
+    controller._set_qpos(controller.neutral_qpos)
+    scene.step()
+
+    print(
+        f"[r_geom debug] robot_base_pos={robot_base_pos}, "
+        f"candidate_min={cand_min}, candidate_max={cand_max}"
+    )
+
+    M, Q, D = queries.shape
+    if D != 4:
+        raise ValueError(f"queries 最后一维应为 4，收到 shape={queries.shape}")
+
+    R_geom = np.zeros((M, Q), dtype=np.float32)
+
+    n_total = M * Q
+    n_ik_fail = 0
+    n_collision_fail = 0
+    n_positive = 0
+    n_nan = 0
+
+    # 只打印少量失败样例，避免刷屏
+    printed_ik = 0
+    printed_col = 0
+
+    for i in range(M):
+        p_i = candidate_p[i]
+
+        for j in range(Q):
+            psi = queries[i, j, :3]
+            g_idx = int(round(float(queries[i, j, 3])))
+
+            try:
+                # Step 1: 目标末端位姿
+                target_pos, target_rot = compute_target_pose(p_i, psi, g_idx)
+
+                # Step 2: IK
+                # 先尝试完整 6D IK；失败后回退到 position-only IK。
+                qpos = solve_ik(controller, target_pos, target_rot)
+                used_position_only = False
+
+                if qpos is None:
+                    qpos = solve_ik_position_only(
+                        controller=controller,
+                        target_pos=target_pos,
+                        init_qpos=controller.neutral_qpos,
+                        pos_tol=0.08,
+                        max_iter=120,
+                    )
+                    used_position_only = qpos is not None
+
+                if qpos is None:
+                    n_ik_fail += 1
+                    if printed_ik < 5:
+                        # 额外打印当前 neutral EE，帮助判断机器人是否在工作空间附近
+                        ee_pos, _ = controller.forward_kinematics(controller.neutral_qpos)
+                        print(
+                            f"[r_geom debug] IK_FAIL "
+                            f"i={i}, j={j}, g={g_idx}, "
+                            f"p={p_i}, psi={psi}, target={target_pos}, "
+                            f"neutral_ee={ee_pos}"
+                        )
+                        printed_ik += 1
+                    continue
+
+                # Step 3: 碰撞检测
+                #
+                # 阶段二先不把 collision 作为 hard reject。
+                # 当前 PartNet-Mobility 物体坐标、Franka base 自动放置和 SAPIEN contact
+                # 还没有完全标定，直接 hard reject 会导致 R_geom 全 0。
+                #
+                # 这里仍然统计 collision，但不 continue，让 IK 可达样本保留正分。
+                controller._set_qpos(qpos)
+                has_collision = controller.check_collision()
+                if has_collision:
+                    n_collision_fail += 1
+                    if printed_col < 5:
+                        print(
+                            f"[r_geom debug] COLLISION_WARN "
+                            f"i={i}, j={j}, g={g_idx}, "
+                            f"target={target_pos}, qpos={qpos}"
+                        )
+                        printed_col += 1
+
+                # Step 4: soft score
+                margin = compute_joint_margin(qpos, controller.joint_limits)
+                yoshi = compute_yoshikawa(controller, qpos)
+                r = float(np.clip(0.5 * margin + 0.5 * yoshi, 0.0, 1.0))
+
+                # position-only fallback 的几何可信度略低，给一个轻微折扣；
+                # 但不要归零，否则无法判断可达性。
+                if used_position_only:
+                    r *= 0.85
+
+                R_geom[i, j] = r
+                if r > 0:
+                    n_positive += 1
+
+            except Exception as e:
+                n_nan += 1
+                R_geom[i, j] = 0.0
+                if n_nan <= 5:
+                    print(
+                        f"[r_geom debug] EXCEPTION "
+                        f"i={i}, j={j}, g={g_idx}: {type(e).__name__}: {e}"
+                    )
+
+    print(
+        "[r_geom debug] summary: "
+        f"total={n_total}, "
+        f"ik_fail={n_ik_fail}, "
+        f"collision_fail={n_collision_fail}, "
+        f"positive={n_positive}, "
+        f"exception={n_nan}, "
+        f"mean={float(R_geom.mean()):.6f}, "
+        f"nonzero={float(np.mean(R_geom > 0)):.2%}"
+    )
+
+    return R_geom
 
 # ──────────────────────────────────────────────
 # 可视化：极坐标玫瑰图

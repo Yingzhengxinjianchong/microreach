@@ -1,0 +1,451 @@
+{
+  "stage": "stage2_label_generation",
+  "category": "Faucet",
+  "scale_definition": "relative_object_scale",
+  "num_selected_instances": 50,
+  "num_success_instances": 47,
+  "num_failed_instances": 3,
+  "failed_instances": [
+    "1401",
+    "1556",
+    "168"
+  ],
+  "total_queries": 8424,
+  "R_geom": {
+    "mean_of_instance_means": 0.15476779574330182,
+    "avg_nonzero_rate": 0.2733747044917257,
+    "min_mean": 0.008228443562984467,
+    "max_mean": 0.4829529821872711,
+    "min_nonzero_rate": 0.016666666666666666,
+    "max_nonzero_rate": 0.85
+  },
+  "R_contact": {
+    "status": "skipped",
+    "value": "NaN placeholder"
+  },
+  "per_instance": {
+    "1011": {
+      "R_geom_mean": 0.11429229378700256,
+      "R_geom_nonzero_rate": 0.20416666666666666,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1034": {
+      "R_geom_mean": 0.16664008796215057,
+      "R_geom_nonzero_rate": 0.29583333333333334,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1052": {
+      "R_geom_mean": 0.008228443562984467,
+      "R_geom_nonzero_rate": 0.016666666666666666,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1053": {
+      "R_geom_mean": 0.037791259586811066,
+      "R_geom_nonzero_rate": 0.06666666666666667,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1280": {
+      "R_geom_mean": 0.1805969774723053,
+      "R_geom_nonzero_rate": 0.31666666666666665,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1288": {
+      "R_geom_mean": 0.13038107752799988,
+      "R_geom_nonzero_rate": 0.23333333333333334,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1343": {
+      "R_geom_mean": 0.04593786224722862,
+      "R_geom_nonzero_rate": 0.08333333333333333,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1380": {
+      "R_geom_mean": 0.29581886529922485,
+      "R_geom_nonzero_rate": 0.5166666666666667,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1386": {
+      "R_geom_mean": 0.04193573445081711,
+      "R_geom_nonzero_rate": 0.075,
+      "num_queries": 360,
+      "shape": [
+        15,
+        24
+      ]
+    },
+    "1444": {
+      "R_geom_mean": 0.023057278245687485,
+      "R_geom_nonzero_rate": 0.041666666666666664,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1466": {
+      "R_geom_mean": 0.20313045382499695,
+      "R_geom_nonzero_rate": 0.36666666666666664,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "148": {
+      "R_geom_mean": 0.38960832357406616,
+      "R_geom_nonzero_rate": 0.6833333333333333,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1488": {
+      "R_geom_mean": 0.31216785311698914,
+      "R_geom_nonzero_rate": 0.5416666666666666,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1528": {
+      "R_geom_mean": 0.10272718966007233,
+      "R_geom_nonzero_rate": 0.18055555555555555,
+      "num_queries": 72,
+      "shape": [
+        3,
+        24
+      ]
+    },
+    "153": {
+      "R_geom_mean": 0.4829529821872711,
+      "R_geom_nonzero_rate": 0.85,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "156": {
+      "R_geom_mean": 0.10746745765209198,
+      "R_geom_nonzero_rate": 0.19166666666666668,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1596": {
+      "R_geom_mean": 0.13905103504657745,
+      "R_geom_nonzero_rate": 0.25,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1626": {
+      "R_geom_mean": 0.2346929907798767,
+      "R_geom_nonzero_rate": 0.4166666666666667,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1633": {
+      "R_geom_mean": 0.12795694172382355,
+      "R_geom_nonzero_rate": 0.23333333333333334,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1646": {
+      "R_geom_mean": 0.04566042497754097,
+      "R_geom_nonzero_rate": 0.08333333333333333,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1667": {
+      "R_geom_mean": 0.2346372902393341,
+      "R_geom_nonzero_rate": 0.4166666666666667,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1712": {
+      "R_geom_mean": 0.03336196765303612,
+      "R_geom_nonzero_rate": 0.0625,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1741": {
+      "R_geom_mean": 0.40482190251350403,
+      "R_geom_nonzero_rate": 0.7083333333333334,
+      "num_queries": 48,
+      "shape": [
+        2,
+        24
+      ]
+    },
+    "1785": {
+      "R_geom_mean": 0.07085853070020676,
+      "R_geom_nonzero_rate": 0.12916666666666668,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1794": {
+      "R_geom_mean": 0.2674255967140198,
+      "R_geom_nonzero_rate": 0.475,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1795": {
+      "R_geom_mean": 0.13744528591632843,
+      "R_geom_nonzero_rate": 0.24166666666666667,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1802": {
+      "R_geom_mean": 0.2447853535413742,
+      "R_geom_nonzero_rate": 0.4361111111111111,
+      "num_queries": 360,
+      "shape": [
+        15,
+        24
+      ]
+    },
+    "1823": {
+      "R_geom_mean": 0.23039302229881287,
+      "R_geom_nonzero_rate": 0.4,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "1832": {
+      "R_geom_mean": 0.26005426049232483,
+      "R_geom_nonzero_rate": 0.4583333333333333,
+      "num_queries": 24,
+      "shape": [
+        1,
+        24
+      ]
+    },
+    "1886": {
+      "R_geom_mean": 0.09572002291679382,
+      "R_geom_nonzero_rate": 0.16666666666666666,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1896": {
+      "R_geom_mean": 0.020516015589237213,
+      "R_geom_nonzero_rate": 0.0375,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1925": {
+      "R_geom_mean": 0.04541047289967537,
+      "R_geom_nonzero_rate": 0.07916666666666666,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "1961": {
+      "R_geom_mean": 0.21995098888874054,
+      "R_geom_nonzero_rate": 0.38333333333333336,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "2083": {
+      "R_geom_mean": 0.014428657479584217,
+      "R_geom_nonzero_rate": 0.025,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "2084": {
+      "R_geom_mean": 0.34681522846221924,
+      "R_geom_nonzero_rate": 0.6083333333333333,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "2115": {
+      "R_geom_mean": 0.3768737018108368,
+      "R_geom_nonzero_rate": 0.6583333333333333,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "2170": {
+      "R_geom_mean": 0.027428051456809044,
+      "R_geom_nonzero_rate": 0.05,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "693": {
+      "R_geom_mean": 0.011433709412813187,
+      "R_geom_nonzero_rate": 0.020833333333333332,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "822": {
+      "R_geom_mean": 0.14105071127414703,
+      "R_geom_nonzero_rate": 0.25,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "862": {
+      "R_geom_mean": 0.12192504107952118,
+      "R_geom_nonzero_rate": 0.2125,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "866": {
+      "R_geom_mean": 0.1571081429719925,
+      "R_geom_nonzero_rate": 0.2833333333333333,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "885": {
+      "R_geom_mean": 0.09076640009880066,
+      "R_geom_nonzero_rate": 0.1625,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "908": {
+      "R_geom_mean": 0.09748231619596481,
+      "R_geom_nonzero_rate": 0.17083333333333334,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "912": {
+      "R_geom_mean": 0.1955876648426056,
+      "R_geom_nonzero_rate": 0.3416666666666667,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    },
+    "920": {
+      "R_geom_mean": 0.10829940438270569,
+      "R_geom_nonzero_rate": 0.19444444444444445,
+      "num_queries": 360,
+      "shape": [
+        15,
+        24
+      ]
+    },
+    "960": {
+      "R_geom_mean": 0.03927011415362358,
+      "R_geom_nonzero_rate": 0.07083333333333333,
+      "num_queries": 240,
+      "shape": [
+        10,
+        24
+      ]
+    },
+    "991": {
+      "R_geom_mean": 0.09014101326465607,
+      "R_geom_nonzero_rate": 0.15833333333333333,
+      "num_queries": 120,
+      "shape": [
+        5,
+        24
+      ]
+    }
+  }
+}

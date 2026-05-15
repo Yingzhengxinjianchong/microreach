@@ -40,6 +40,7 @@ import json
 import os
 import random
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -70,8 +71,20 @@ except ImportError:
 
 TARGET_CATEGORY = "StorageFurniture"
 
-# 视为"交互 part"的语义关键词（小写匹配）
-HANDLE_KEYWORDS = {"handle", "knob", "lid", "latch", "pull", "grip", "button"}
+# 视为"交互 part"的语义关键词
+HANDLE_KEYWORDS = {
+    # general micro interaction parts
+    "handle", "knob", "lid", "latch", "pull", "grip", "button",
+    "switch", "key", "cap", "plug", "press", "push",
+
+    # articulated / movable parts
+    "lever", "slider", "toggle_button",
+
+    # coarse articulated furniture parts, kept for compatibility
+    "door", "drawer",
+    "rotation_door", "translation_door",
+    "rotation_lid", "translation_lid",
+}
 
 # 阶段三可扩展的类别映射（阶段二只用 StorageFurniture）
 STAGE3_CATEGORIES = {
@@ -146,17 +159,116 @@ def find_handle_links(instance_dir: Path) -> List[Tuple[str, str]]:
 # 读取 part mesh
 # ──────────────────────────────────────────────
 
+def _resolve_mesh_path(instance_dir: Path, filename: str) -> Optional[Path]:
+    """
+    将 URDF 里的 mesh filename 解析为真实 .obj 路径。
+    兼容 package://、相对路径、textured_objs/original-*.obj 等写法。
+    """
+    if not filename:
+        return None
+
+    s = filename.replace("\\", "/")
+
+    if s.startswith("package://"):
+        s = s[len("package://"):]
+
+    if s.startswith("file://"):
+        s = s[len("file://"):]
+
+    # 如果路径里包含 textured_objs/ 或 part_objs/，截取这部分之后拼到 instance_dir
+    candidates = []
+
+    for marker in ("textured_objs/", "part_objs/"):
+        if marker in s:
+            rel = s[s.index(marker):]
+            candidates.append(instance_dir / rel)
+
+    p = Path(s)
+    if p.is_absolute():
+        candidates.append(p)
+    else:
+        candidates.append(instance_dir / s)
+        candidates.append(instance_dir / p.name)
+        candidates.append(instance_dir / "textured_objs" / p.name)
+        candidates.append(instance_dir / "part_objs" / p.name)
+
+    for c in candidates:
+        if c.exists() and c.suffix.lower() == ".obj":
+            return c
+
+    return None
+
+
+def _find_urdf_meshes_for_link(instance_dir: Path, link_name: str) -> List[Path]:
+    """
+    从 mobility.urdf 中读取指定 link 对应的 mesh 文件。
+    这是 PartNet-Mobility 扁平 textured_objs 结构下最关键的映射。
+    """
+    urdf_path = instance_dir / "mobility.urdf"
+    if not urdf_path.exists():
+        return []
+
+    try:
+        root = ET.parse(urdf_path).getroot()
+    except Exception:
+        return []
+
+    mesh_files: List[Path] = []
+
+    for elem in root.iter():
+        if not elem.tag.endswith("link"):
+            continue
+
+        if elem.attrib.get("name") != link_name:
+            continue
+
+        for child in elem.iter():
+            if not child.tag.endswith("mesh"):
+                continue
+
+            filename = (
+                child.attrib.get("filename")
+                or child.attrib.get("file")
+                or child.attrib.get("url")
+            )
+            path = _resolve_mesh_path(instance_dir, filename)
+            if path is not None:
+                mesh_files.append(path)
+
+    # 去重并排序，保证可复现
+    return sorted(set(mesh_files))
+
+
 def find_mesh_files(instance_dir: Path, link_name: str) -> List[Path]:
     """
-    在 textured_objs/<link_name>/ 或 part_objs/<link_name>/ 下找 .obj 文件。
-    PartNet-Mobility 的两种常见目录名都兼容。
+    找指定 link 对应的 .obj 文件。
+
+    注意：
+    不再在扁平 textured_objs/ 结构下把所有 *.obj 都返回给每个 link。
+    否则每个 part 都会变成“整件家具”，最终全部被分成 macro。
     """
-    candidates = []
+    candidates: List[Path] = []
+
+    # 结构A：textured_objs/<link_name>/*.obj 或 part_objs/<link_name>/*.obj
     for subdir in ("textured_objs", "part_objs"):
-        link_dir = instance_dir / subdir / link_name
+        base = instance_dir / subdir
+        if not base.is_dir():
+            continue
+
+        link_dir = base / link_name
         if link_dir.is_dir():
             candidates.extend(link_dir.glob("*.obj"))
-    return candidates
+
+    if candidates:
+        return sorted(set(candidates))
+
+    # 结构B：扁平 textured_objs/*.obj，需要通过 mobility.urdf 映射 link -> mesh
+    urdf_meshes = _find_urdf_meshes_for_link(instance_dir, link_name)
+    if urdf_meshes:
+        return urdf_meshes
+
+    # 不要 fallback 到 base.glob("*.obj")，那会把整件家具当成每个 part
+    return []
 
 
 def load_part_vertices(instance_dir: Path, link_name: str) -> Optional[np.ndarray]:
@@ -234,13 +346,17 @@ def is_valid_instance(
     if not handles:
         return False, "无 handle/knob/lid 标注"
 
-    # 条件4：至少一个 handle link 有可用 mesh
-    for link_name, _label in handles:
-        verts = load_part_vertices(instance_dir, link_name)
-        if verts is not None and len(verts) >= 4:
-            return True, ""
-
-    return False, "handle link 无可用 mesh（顶点数 < 4）"
+    # 条件4：检查 textured_objs/ 下是否有任何 .obj
+    has_mesh = False
+    for subdir in ("textured_objs", "part_objs"):
+        base = instance_dir / subdir
+        if base.is_dir() and any(base.rglob("*.obj")):
+            has_mesh = True
+            break
+    if not has_mesh:
+        return False, "无可用 mesh (.obj 文件)"
+    
+    return True, ""
 
 
 def scan_valid_instances(
@@ -358,6 +474,11 @@ def build_instance_record(
     # 统计全场景点数（所有 part 顶点之和，近似）
     scene_n_points = sum(len(v) for v in parts_vertices.values())
 
+    # 统计整件物体的 AABB 三轴边长，用于相对 micro/meso/macro 分档。
+    # 注意：不改变 JSON schema，只影响 tier 的判定方式。
+    scene_points = np.concatenate(list(parts_vertices.values()), axis=0)
+    scene_extent = scene_points.max(axis=0) - scene_points.min(axis=0)
+
     # 调用 micro_meso_macro_split 的 classify_part
     record = InstanceRecord(instance_id=instance_id, category=category)
     for part_key, verts in parts_vertices.items():
@@ -366,6 +487,7 @@ def build_instance_record(
             part_id        = part_key,
             part_points    = verts,
             scene_n_points = scene_n_points,
+            scene_extent   = scene_extent,
         )
         record.part_records.append(pr)
 
@@ -509,7 +631,7 @@ def _run_tests() -> None:
         _make_mock_instance(data_dir / "002", "StorageFurniture", [("link_0", "slider", "knob")])
         # inst_003: Microwave → 不应被选中（类别不符）
         _make_mock_instance(data_dir / "003", "Microwave", [("link_0", "hinge", "handle")])
-        # inst_004: StorageFurniture 但无 handle → 不应被选中
+        # inst_004: StorageFurniture + door → 应被选中
         _make_mock_instance(data_dir / "004", "StorageFurniture", [("link_0", "hinge", "door")])
         # inst_005: StorageFurniture + lid → 应被选中
         _make_mock_instance(data_dir / "005", "StorageFurniture", [("link_0", "hinge", "lid")])
@@ -517,7 +639,7 @@ def _run_tests() -> None:
         # ── 测试 1：scan_valid_instances ──
         print("\n[Test 1] scan_valid_instances")
         valid = scan_valid_instances(str(data_dir), "StorageFurniture", verbose=False)
-        assert set(valid) == {"001", "002", "005"}, f"期望 {{001,002,005}}，得 {set(valid)}"
+        assert set(valid) == {"001", "002", "004", "005"}, f"期望 {{001,002,004,005}}，得 {set(valid)}"
         print(f"  有效实例: {sorted(valid)} ✓")
 
         # ── 测试 2：select_instances 抽样 ──

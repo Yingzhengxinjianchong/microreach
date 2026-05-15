@@ -9,6 +9,6 @@ wandb==0.16.0
 pyyaml==6.0.1
 tqdm==4.66.1
 plyfile==1.0.2
-spconv-cu121==2.3.6
+spconv-cu121==2.3.7
 scipy==1.11.4
 seaborn==0.13.0

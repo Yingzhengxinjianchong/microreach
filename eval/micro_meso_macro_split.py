@@ -1,18 +1,22 @@
 """
 eval/micro_meso_macro_split.py
 
-对每个 part 按其点云的 OBB（方向包围盒）最大边长自动分档：
-    micro : OBB 最大边 ≤ 5 cm   （主战场，MicroReach 核心评测）
-    meso  : 5 cm < OBB 最大边 ≤ 15 cm
-    macro : OBB 最大边 > 15 cm  （验证大件不退化）
+对每个 part 按其点云尺度自动分档：
+    默认采用“相对物体尺度”分档：
+        micro : part AABB 体积 / object AABB 体积 ≤ relative_micro_upper
+        meso  : relative_micro_upper < 体积占比 ≤ relative_meso_upper
+        macro : 体积占比 > relative_meso_upper
+
+    若没有传入 object / scene 尺度，则回退到旧版绝对 OBB 最大边长分档：
+        micro : OBB 最大边 ≤ 5 cm
+        meso  : 5 cm < OBB 最大边 ≤ 15 cm
+        macro : OBB 最大边 > 15 cm
 
 设计决策：
-    - 单位：meters（PartNet-Mobility URDF 的标准单位）
-      阈值写在 THRESHOLDS 常量里，外部可覆盖。
-    - 输入可以是 (N,3) 点云或 trimesh.Trimesh 对象。
-    - 阶段二中期 50 个 StorageFurniture 柜门把手基本全为 micro，
-      但代码必须完整，阶段三可直接复用 200 实例评测集。
-    - eval_set_200.json 格式见 load_eval_set / save_eval_set。
+    - PartNet-Mobility 的 OBJ 坐标在当前数据版本中更接近归一化物体坐标，
+      不能可靠地直接解释为真实物理米制尺寸。
+    - 因此阶段二默认用物体内部相对尺度定义 micro/meso/macro。
+    - THRESHOLDS 中仍保留旧版绝对阈值，作为没有 scene_extent 时的 fallback。
 
 依赖：numpy, trimesh（已在 requirements.txt）
       open3d 作为可选后备（trimesh OBB 若异常时使用）
@@ -43,10 +47,17 @@ except ImportError:
 # 常量
 # ──────────────────────────────────────────────
 
-# 单位：meters（与 PartNet-Mobility URDF 一致）
+# 旧版绝对阈值：仅作为 fallback 使用
+# 当前 PartNet-Mobility OBJ 坐标不能可靠视为真实物理米制尺寸。
 THRESHOLDS: Dict[str, float] = {
-    "micro_upper": 0.05,   # ≤ 5 cm  → micro
-    "meso_upper":  0.15,   # ≤ 15 cm → meso  （> 15cm → macro）
+    "micro_upper": 0.05,   # fallback: ≤ 5 cm  → micro
+    "meso_upper":  0.15,   # fallback: ≤ 15 cm → meso
+
+    # 相对尺度阈值：
+    # 使用 part AABB volume / object AABB volume 做分档。
+    # 这比单独使用最大边长更适合归一化坐标里的细长部件。
+    "relative_micro_upper": 0.15,
+    "relative_meso_upper":  0.45,
 }
 
 Tier = Literal["micro", "meso", "macro"]
@@ -201,18 +212,69 @@ def classify_tier(
     thresholds: Dict[str, float] = THRESHOLDS,
 ) -> Tier:
     """
-    按 OBB 最大边长对 part 分档。
+    旧版 fallback：按 OBB 最大边长对 part 分档。
 
-    Args:
-        obb_max_edge: 单位 meters
-        thresholds:   可覆盖 THRESHOLDS
-
-    Returns:
-        "micro" | "meso" | "macro"
+    注意：
+        只有在没有 scene_extent 时才使用这个绝对尺度分档。
+        当前 PartNet-Mobility OBJ 坐标不应默认解释为真实物理米制尺寸。
     """
     if obb_max_edge <= thresholds["micro_upper"]:
         return "micro"
     elif obb_max_edge <= thresholds["meso_upper"]:
+        return "meso"
+    else:
+        return "macro"
+
+
+def compute_aabb_extent(points: np.ndarray) -> np.ndarray:
+    """
+    计算点云 AABB 三轴边长，返回 shape=(3,)。
+
+    用于相对尺度分档：
+        part AABB volume / object AABB volume
+
+    AABB 在这里比 OBB 更便宜，也更稳定；
+    PartRecord 中仍然保留 obb_max_edge_m 字段，供后续分析使用。
+    """
+    if points.ndim != 2 or points.shape[1] != 3:
+        raise ValueError(f"points 必须为 (N,3)，收到 {points.shape}")
+    if len(points) < 1:
+        return np.zeros(3, dtype=np.float32)
+
+    return (points.max(axis=0) - points.min(axis=0)).astype(np.float32)
+
+
+def _safe_box_volume(extent: np.ndarray) -> float:
+    """
+    计算盒体体积，带 eps 防止 0 体积导致除零。
+    """
+    extent = np.asarray(extent, dtype=np.float32)
+    extent = np.maximum(extent, 1e-8)
+    return float(np.prod(extent))
+
+
+def classify_tier_relative(
+    part_points: np.ndarray,
+    scene_extent: np.ndarray,
+    thresholds: Dict[str, float] = THRESHOLDS,
+) -> Tier:
+    """
+    按相对物体尺度对 part 分档。
+
+    使用：
+        part_aabb_volume / scene_aabb_volume
+
+    这样不依赖真实米制单位，适合当前 PartNet-Mobility 的归一化 OBJ 坐标。
+    """
+    part_extent = compute_aabb_extent(part_points)
+
+    part_vol = _safe_box_volume(part_extent)
+    scene_vol = _safe_box_volume(scene_extent)
+    rel_vol = part_vol / scene_vol
+
+    if rel_vol <= thresholds["relative_micro_upper"]:
+        return "micro"
+    elif rel_vol <= thresholds["relative_meso_upper"]:
         return "meso"
     else:
         return "macro"
@@ -225,6 +287,7 @@ def classify_part(
     scene_n_points:   int,
     thresholds:       Dict[str, float] = THRESHOLDS,
     backend:          str = "auto",
+    scene_extent:     Optional[np.ndarray] = None,
 ) -> PartRecord:
     """
     对单个 part 完成 OBB 计算 + 分档 + 统计。
@@ -232,16 +295,28 @@ def classify_part(
     Args:
         instance_id:    实例 ID 字符串
         part_id:        part ID 字符串
-        part_points:    该 part 的点云，shape (N_part, 3)，单位 meters
+        part_points:    该 part 的点云，shape (N_part, 3)
         scene_n_points: 全场景点云总点数（用于计算 point_cloud_ratio）
         thresholds:     阈值字典，默认 THRESHOLDS
         backend:        OBB backend
+        scene_extent:   整个实例 AABB 三轴边长。
+                        若提供，则使用相对尺度分档；
+                        若为 None，则回退到旧版绝对 OBB 最大边分档。
 
     Returns:
         PartRecord
     """
     obb_max_edge = compute_obb_max_edge(part_points, backend=backend)
-    tier = classify_tier(obb_max_edge, thresholds)
+
+    if scene_extent is not None:
+        tier = classify_tier_relative(
+            part_points=part_points,
+            scene_extent=scene_extent,
+            thresholds=thresholds,
+        )
+    else:
+        tier = classify_tier(obb_max_edge, thresholds)
+
     n_points = len(part_points)
     ratio = n_points / max(scene_n_points, 1)
 
@@ -277,6 +352,12 @@ def classify_instance(
     """
     scene_n_points = sum(len(pts) for pts in parts_point_clouds.values())
 
+    scene_extent: Optional[np.ndarray] = None
+    if parts_point_clouds:
+        scene_points = np.concatenate(list(parts_point_clouds.values()), axis=0)
+        if len(scene_points) >= 1:
+            scene_extent = compute_aabb_extent(scene_points)
+
     record = InstanceRecord(instance_id=instance_id, category=category)
     for part_id, part_pts in parts_point_clouds.items():
         pr = classify_part(
@@ -286,6 +367,7 @@ def classify_instance(
             scene_n_points = scene_n_points,
             thresholds     = thresholds,
             backend        = backend,
+            scene_extent   = scene_extent,
         )
         record.part_records.append(pr)
 
@@ -445,9 +527,9 @@ def _run_tests() -> None:
     # ── 测试 4：classify_instance 批量处理 ──
     print("\n[Test 4] classify_instance 批量处理")
     parts = {
-        "handle": rng.random((100, 3)).astype(np.float32) * 0.04,   # ~2 cm → micro
-        "door":   rng.random((500, 3)).astype(np.float32) * 0.30,   # ~15 cm → meso/macro
-        "cabinet":rng.random((300, 3)).astype(np.float32) * 0.60,   # ~30 cm → macro
+        "handle": rng.random((100, 3)).astype(np.float32) * 0.04,   # 相对整体很小 → micro
+        "door":   rng.random((500, 3)).astype(np.float32) * 0.30,   # 中等相对尺度 → meso
+        "cabinet":rng.random((300, 3)).astype(np.float32) * 0.60,   # 最大主体部件 → macro
     }
     inst_rec = classify_instance("inst_002", "StorageFurniture", parts)
     assert inst_rec.instance_id == "inst_002"

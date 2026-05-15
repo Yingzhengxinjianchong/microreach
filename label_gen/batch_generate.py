@@ -96,7 +96,7 @@ FAILURE_LOG_PATH = DATA_DIR / "failure_cases.jsonl"
 
 CHECKPOINT_EVERY = 10        # 每处理 N 个实例保存一次断点
 CONSISTENCY_TOL = 0.05       # R_contact ≤ R_geom 容差
-GIT_AUTO_PUSH = True         # 全部完成后自动 git push
+GIT_AUTO_PUSH = False         # 全部完成后手动 git push
 
 
 # ---------------------------------------------------------------------------
@@ -252,7 +252,18 @@ def process_instance(
         if sq is None:
             raise RuntimeError("sample_queries 未导入")
 
-        queries = sq.generate_queries(candidate_p)  # (M, 24, 4)
+        # sample_queries.py 当前接口为 sample_queries_for_instance(...)
+        # 返回 (psi_directions, queries)，这里只需要 queries。
+        if hasattr(sq, "generate_queries"):
+            queries = sq.generate_queries(candidate_p)  # 兼容旧接口
+        elif hasattr(sq, "sample_queries_for_instance"):
+            _psi_directions, queries = sq.sample_queries_for_instance(candidate_p)
+        else:
+            raise RuntimeError(
+                "sample_queries.py 中既没有 generate_queries，也没有 "
+                "sample_queries_for_instance，请检查接口。"
+            )
+
         logging.info(f"  [queries] shape={queries.shape}")
 
         # ---- Step 3: r_geom → R_geom ----
@@ -398,11 +409,21 @@ def main(
         sys.exit(1)
 
     with open(EVAL_SET_PATH, "r", encoding="utf-8") as f:
-        eval_set: Dict[str, Any] = json.load(f)
+        eval_set_raw = json.load(f)
 
-    instances: List[Dict[str, Any]] = eval_set.get("instances", [])
+    # 兼容两种 eval set 格式：
+    # 1) 旧格式: {"instances": [...]}
+    # 2) 当前 save_eval_set 输出格式: [{instance_id, category, parts, ...}, ...]
+    if isinstance(eval_set_raw, list):
+        instances: List[Dict[str, Any]] = eval_set_raw
+    elif isinstance(eval_set_raw, dict):
+        instances = eval_set_raw.get("instances", [])
+    else:
+        logging.error(f"eval_set_200.json 格式错误: {type(eval_set_raw)}")
+        sys.exit(1)
+
     if not instances:
-        logging.error("eval_set_200.json 中 instances 列表为空！")
+        logging.error("eval_set_200.json 中实例列表为空！")
         sys.exit(1)
 
     logging.info(f"实例总数: {len(instances)}")

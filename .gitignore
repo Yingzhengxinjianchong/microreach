@@ -20,3 +20,29 @@ Thumbs.db
 
 # 日志文件
 logs/
+# Jupyter / notebook cache
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Backup files
+*.bak
+*.py.bak
+
+# Runtime logs
+logs/*.log
+
+# Extra ManiSkill robot assets copied during setup; not required by r_geom.py
+assets/franka/mobile_panda_*.urdf
+assets/franka/panda_bucket.*
+assets/franka/panda_pinch.*
+assets/franka/panda_stick.*
+assets/franka/panda_v2.*
+assets/franka/panda_v2_gripper.urdf
+assets/franka/panda_v3.*
+assets/franka/realsense2_description/
+assets/franka/sciurus17_description/

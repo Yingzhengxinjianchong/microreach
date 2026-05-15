@@ -1,0 +1,1400 @@
+[
+  {
+    "instance_id": "1011",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1011",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.938708,
+        "tier": "micro",
+        "n_points": 15382,
+        "point_cloud_ratio": 0.187617
+      },
+      {
+        "instance_id": "1011",
+        "part_id": "link_1:stem",
+        "obb_max_edge_m": 0.960707,
+        "tier": "micro",
+        "n_points": 784,
+        "point_cloud_ratio": 0.009563
+      },
+      {
+        "instance_id": "1011",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.246801,
+        "tier": "macro",
+        "n_points": 65820,
+        "point_cloud_ratio": 0.80282
+      }
+    ]
+  },
+  {
+    "instance_id": "1034",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1034",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.540099,
+        "tier": "micro",
+        "n_points": 748,
+        "point_cloud_ratio": 0.117462
+      },
+      {
+        "instance_id": "1034",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.536286,
+        "tier": "micro",
+        "n_points": 1044,
+        "point_cloud_ratio": 0.163945
+      },
+      {
+        "instance_id": "1034",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.610697,
+        "tier": "meso",
+        "n_points": 4576,
+        "point_cloud_ratio": 0.718593
+      }
+    ]
+  },
+  {
+    "instance_id": "1052",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1052",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.644034,
+        "tier": "micro",
+        "n_points": 3306,
+        "point_cloud_ratio": 0.224014
+      },
+      {
+        "instance_id": "1052",
+        "part_id": "link_1:spout",
+        "obb_max_edge_m": 1.485763,
+        "tier": "micro",
+        "n_points": 6648,
+        "point_cloud_ratio": 0.450468
+      },
+      {
+        "instance_id": "1052",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 0.642472,
+        "tier": "micro",
+        "n_points": 4804,
+        "point_cloud_ratio": 0.325518
+      }
+    ]
+  },
+  {
+    "instance_id": "1053",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1053",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 1.109551,
+        "tier": "meso",
+        "n_points": 622,
+        "point_cloud_ratio": 0.168609
+      },
+      {
+        "instance_id": "1053",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.330518,
+        "tier": "macro",
+        "n_points": 3067,
+        "point_cloud_ratio": 0.831391
+      }
+    ]
+  },
+  {
+    "instance_id": "1280",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1280",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.366201,
+        "tier": "micro",
+        "n_points": 336,
+        "point_cloud_ratio": 0.09589
+      },
+      {
+        "instance_id": "1280",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.366201,
+        "tier": "micro",
+        "n_points": 336,
+        "point_cloud_ratio": 0.09589
+      },
+      {
+        "instance_id": "1280",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.972653,
+        "tier": "macro",
+        "n_points": 2832,
+        "point_cloud_ratio": 0.808219
+      }
+    ]
+  },
+  {
+    "instance_id": "1288",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1288",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.860501,
+        "tier": "micro",
+        "n_points": 1640,
+        "point_cloud_ratio": 0.050749
+      },
+      {
+        "instance_id": "1288",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.661777,
+        "tier": "macro",
+        "n_points": 30676,
+        "point_cloud_ratio": 0.949251
+      }
+    ]
+  },
+  {
+    "instance_id": "1343",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1343",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.992551,
+        "tier": "micro",
+        "n_points": 1630,
+        "point_cloud_ratio": 0.440541
+      },
+      {
+        "instance_id": "1343",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.47772,
+        "tier": "macro",
+        "n_points": 2070,
+        "point_cloud_ratio": 0.559459
+      }
+    ]
+  },
+  {
+    "instance_id": "1380",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1380",
+        "part_id": "link_0:faucet_base",
+        "obb_max_edge_m": 1.303221,
+        "tier": "macro",
+        "n_points": 1926,
+        "point_cloud_ratio": 0.365049
+      },
+      {
+        "instance_id": "1380",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 1.138591,
+        "tier": "meso",
+        "n_points": 3350,
+        "point_cloud_ratio": 0.634951
+      }
+    ]
+  },
+  {
+    "instance_id": "1386",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1386",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.316761,
+        "tier": "micro",
+        "n_points": 86536,
+        "point_cloud_ratio": 0.380853
+      },
+      {
+        "instance_id": "1386",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.318472,
+        "tier": "micro",
+        "n_points": 86536,
+        "point_cloud_ratio": 0.380853
+      },
+      {
+        "instance_id": "1386",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.531694,
+        "tier": "meso",
+        "n_points": 44348,
+        "point_cloud_ratio": 0.19518
+      },
+      {
+        "instance_id": "1386",
+        "part_id": "link_3:spout",
+        "obb_max_edge_m": 1.137548,
+        "tier": "micro",
+        "n_points": 9796,
+        "point_cloud_ratio": 0.043113
+      }
+    ]
+  },
+  {
+    "instance_id": "1401",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1401",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.489768,
+        "tier": "micro",
+        "n_points": 208,
+        "point_cloud_ratio": 0.059361
+      },
+      {
+        "instance_id": "1401",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.489768,
+        "tier": "micro",
+        "n_points": 208,
+        "point_cloud_ratio": 0.059361
+      },
+      {
+        "instance_id": "1401",
+        "part_id": "link_2:stem",
+        "obb_max_edge_m": 0.10627,
+        "tier": "micro",
+        "n_points": 448,
+        "point_cloud_ratio": 0.127854
+      },
+      {
+        "instance_id": "1401",
+        "part_id": "link_3:faucet_base",
+        "obb_max_edge_m": 1.941463,
+        "tier": "macro",
+        "n_points": 2640,
+        "point_cloud_ratio": 0.753425
+      }
+    ]
+  },
+  {
+    "instance_id": "1444",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1444",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.622173,
+        "tier": "micro",
+        "n_points": 1630,
+        "point_cloud_ratio": 0.384979
+      },
+      {
+        "instance_id": "1444",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.22069,
+        "tier": "macro",
+        "n_points": 2604,
+        "point_cloud_ratio": 0.615021
+      }
+    ]
+  },
+  {
+    "instance_id": "1466",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1466",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 1.031893,
+        "tier": "micro",
+        "n_points": 1506,
+        "point_cloud_ratio": 0.138725
+      },
+      {
+        "instance_id": "1466",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.476611,
+        "tier": "macro",
+        "n_points": 9350,
+        "point_cloud_ratio": 0.861275
+      }
+    ]
+  },
+  {
+    "instance_id": "148",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "148",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.68443,
+        "tier": "micro",
+        "n_points": 590,
+        "point_cloud_ratio": 0.287244
+      },
+      {
+        "instance_id": "148",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.62643,
+        "tier": "macro",
+        "n_points": 1464,
+        "point_cloud_ratio": 0.712756
+      }
+    ]
+  },
+  {
+    "instance_id": "1488",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1488",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.195565,
+        "tier": "micro",
+        "n_points": 3400,
+        "point_cloud_ratio": 0.520355
+      },
+      {
+        "instance_id": "1488",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.673422,
+        "tier": "macro",
+        "n_points": 3134,
+        "point_cloud_ratio": 0.479645
+      }
+    ]
+  },
+  {
+    "instance_id": "1528",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1528",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.551433,
+        "tier": "micro",
+        "n_points": 1636,
+        "point_cloud_ratio": 0.200736
+      },
+      {
+        "instance_id": "1528",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.717905,
+        "tier": "micro",
+        "n_points": 2054,
+        "point_cloud_ratio": 0.252025
+      },
+      {
+        "instance_id": "1528",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 0.90443,
+        "tier": "micro",
+        "n_points": 4460,
+        "point_cloud_ratio": 0.547239
+      }
+    ]
+  },
+  {
+    "instance_id": "153",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "153",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.58048,
+        "tier": "micro",
+        "n_points": 902,
+        "point_cloud_ratio": 0.112623
+      },
+      {
+        "instance_id": "153",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.883261,
+        "tier": "micro",
+        "n_points": 794,
+        "point_cloud_ratio": 0.099138
+      },
+      {
+        "instance_id": "153",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.280004,
+        "tier": "meso",
+        "n_points": 6313,
+        "point_cloud_ratio": 0.788238
+      }
+    ]
+  },
+  {
+    "instance_id": "1556",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1556",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 1.129173,
+        "tier": "micro",
+        "n_points": 8172,
+        "point_cloud_ratio": 0.447193
+      },
+      {
+        "instance_id": "1556",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.559786,
+        "tier": "macro",
+        "n_points": 10102,
+        "point_cloud_ratio": 0.552807
+      }
+    ]
+  },
+  {
+    "instance_id": "156",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "156",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.676375,
+        "tier": "micro",
+        "n_points": 236,
+        "point_cloud_ratio": 0.064604
+      },
+      {
+        "instance_id": "156",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 2.03449,
+        "tier": "macro",
+        "n_points": 3417,
+        "point_cloud_ratio": 0.935396
+      }
+    ]
+  },
+  {
+    "instance_id": "1596",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1596",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.565157,
+        "tier": "micro",
+        "n_points": 2260,
+        "point_cloud_ratio": 0.294347
+      },
+      {
+        "instance_id": "1596",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.443352,
+        "tier": "micro",
+        "n_points": 2346,
+        "point_cloud_ratio": 0.305548
+      },
+      {
+        "instance_id": "1596",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.575339,
+        "tier": "meso",
+        "n_points": 3072,
+        "point_cloud_ratio": 0.400104
+      }
+    ]
+  },
+  {
+    "instance_id": "1626",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1626",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.489831,
+        "tier": "micro",
+        "n_points": 1544,
+        "point_cloud_ratio": 0.134636
+      },
+      {
+        "instance_id": "1626",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.489818,
+        "tier": "micro",
+        "n_points": 1592,
+        "point_cloud_ratio": 0.138821
+      },
+      {
+        "instance_id": "1626",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.551418,
+        "tier": "macro",
+        "n_points": 8332,
+        "point_cloud_ratio": 0.726543
+      }
+    ]
+  },
+  {
+    "instance_id": "1633",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1633",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.539498,
+        "tier": "micro",
+        "n_points": 2242,
+        "point_cloud_ratio": 0.555776
+      },
+      {
+        "instance_id": "1633",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.505352,
+        "tier": "macro",
+        "n_points": 1792,
+        "point_cloud_ratio": 0.444224
+      }
+    ]
+  },
+  {
+    "instance_id": "1646",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1646",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.971086,
+        "tier": "micro",
+        "n_points": 2242,
+        "point_cloud_ratio": 0.555776
+      },
+      {
+        "instance_id": "1646",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.462665,
+        "tier": "macro",
+        "n_points": 1792,
+        "point_cloud_ratio": 0.444224
+      }
+    ]
+  },
+  {
+    "instance_id": "1667",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1667",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.855407,
+        "tier": "micro",
+        "n_points": 3526,
+        "point_cloud_ratio": 0.768527
+      },
+      {
+        "instance_id": "1667",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.49896,
+        "tier": "macro",
+        "n_points": 1062,
+        "point_cloud_ratio": 0.231473
+      }
+    ]
+  },
+  {
+    "instance_id": "168",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "168",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.484708,
+        "tier": "micro",
+        "n_points": 376,
+        "point_cloud_ratio": 0.096115
+      },
+      {
+        "instance_id": "168",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.724882,
+        "tier": "micro",
+        "n_points": 1812,
+        "point_cloud_ratio": 0.46319
+      },
+      {
+        "instance_id": "168",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.506187,
+        "tier": "micro",
+        "n_points": 1724,
+        "point_cloud_ratio": 0.440695
+      }
+    ]
+  },
+  {
+    "instance_id": "1712",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1712",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.466928,
+        "tier": "micro",
+        "n_points": 2971,
+        "point_cloud_ratio": 0.386799
+      },
+      {
+        "instance_id": "1712",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.159764,
+        "tier": "micro",
+        "n_points": 2424,
+        "point_cloud_ratio": 0.315584
+      },
+      {
+        "instance_id": "1712",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 0.892797,
+        "tier": "micro",
+        "n_points": 2286,
+        "point_cloud_ratio": 0.297617
+      }
+    ]
+  },
+  {
+    "instance_id": "1741",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1741",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.49746,
+        "tier": "micro",
+        "n_points": 632,
+        "point_cloud_ratio": 0.260941
+      },
+      {
+        "instance_id": "1741",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.614662,
+        "tier": "macro",
+        "n_points": 1790,
+        "point_cloud_ratio": 0.739059
+      }
+    ]
+  },
+  {
+    "instance_id": "1785",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1785",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.265052,
+        "tier": "micro",
+        "n_points": 8160,
+        "point_cloud_ratio": 0.613442
+      },
+      {
+        "instance_id": "1785",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.619909,
+        "tier": "micro",
+        "n_points": 4320,
+        "point_cloud_ratio": 0.324763
+      },
+      {
+        "instance_id": "1785",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.26437,
+        "tier": "micro",
+        "n_points": 822,
+        "point_cloud_ratio": 0.061795
+      }
+    ]
+  },
+  {
+    "instance_id": "1794",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1794",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.478318,
+        "tier": "micro",
+        "n_points": 712,
+        "point_cloud_ratio": 0.209166
+      },
+      {
+        "instance_id": "1794",
+        "part_id": "link_1:spout",
+        "obb_max_edge_m": 1.014309,
+        "tier": "micro",
+        "n_points": 842,
+        "point_cloud_ratio": 0.247356
+      },
+      {
+        "instance_id": "1794",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.281994,
+        "tier": "micro",
+        "n_points": 1850,
+        "point_cloud_ratio": 0.543478
+      }
+    ]
+  },
+  {
+    "instance_id": "1795",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1795",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.479559,
+        "tier": "micro",
+        "n_points": 5246,
+        "point_cloud_ratio": 0.180573
+      },
+      {
+        "instance_id": "1795",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.758994,
+        "tier": "macro",
+        "n_points": 23806,
+        "point_cloud_ratio": 0.819427
+      }
+    ]
+  },
+  {
+    "instance_id": "1802",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1802",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.49794,
+        "tier": "micro",
+        "n_points": 896,
+        "point_cloud_ratio": 0.111111
+      },
+      {
+        "instance_id": "1802",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.498168,
+        "tier": "micro",
+        "n_points": 896,
+        "point_cloud_ratio": 0.111111
+      },
+      {
+        "instance_id": "1802",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.422896,
+        "tier": "micro",
+        "n_points": 4224,
+        "point_cloud_ratio": 0.52381
+      },
+      {
+        "instance_id": "1802",
+        "part_id": "link_3:faucet_base",
+        "obb_max_edge_m": 1.521746,
+        "tier": "micro",
+        "n_points": 2048,
+        "point_cloud_ratio": 0.253968
+      }
+    ]
+  },
+  {
+    "instance_id": "1823",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1823",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 1.472406,
+        "tier": "micro",
+        "n_points": 1440,
+        "point_cloud_ratio": 0.252013
+      },
+      {
+        "instance_id": "1823",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.769758,
+        "tier": "meso",
+        "n_points": 4274,
+        "point_cloud_ratio": 0.747987
+      }
+    ]
+  },
+  {
+    "instance_id": "1832",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1832",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.637158,
+        "tier": "micro",
+        "n_points": 15214,
+        "point_cloud_ratio": 0.553558
+      },
+      {
+        "instance_id": "1832",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.59127,
+        "tier": "macro",
+        "n_points": 12270,
+        "point_cloud_ratio": 0.446442
+      }
+    ]
+  },
+  {
+    "instance_id": "1886",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1886",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.534077,
+        "tier": "micro",
+        "n_points": 960,
+        "point_cloud_ratio": 0.130612
+      },
+      {
+        "instance_id": "1886",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.50427,
+        "tier": "micro",
+        "n_points": 1666,
+        "point_cloud_ratio": 0.226667
+      },
+      {
+        "instance_id": "1886",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.736519,
+        "tier": "meso",
+        "n_points": 4724,
+        "point_cloud_ratio": 0.642721
+      }
+    ]
+  },
+  {
+    "instance_id": "1896",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1896",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.639448,
+        "tier": "micro",
+        "n_points": 3520,
+        "point_cloud_ratio": 0.148523
+      },
+      {
+        "instance_id": "1896",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.64234,
+        "tier": "micro",
+        "n_points": 3520,
+        "point_cloud_ratio": 0.148523
+      },
+      {
+        "instance_id": "1896",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.968112,
+        "tier": "macro",
+        "n_points": 16660,
+        "point_cloud_ratio": 0.702954
+      }
+    ]
+  },
+  {
+    "instance_id": "1925",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1925",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.926618,
+        "tier": "micro",
+        "n_points": 1028,
+        "point_cloud_ratio": 0.115118
+      },
+      {
+        "instance_id": "1925",
+        "part_id": "link_1:stem",
+        "obb_max_edge_m": 1.120932,
+        "tier": "micro",
+        "n_points": 292,
+        "point_cloud_ratio": 0.032699
+      },
+      {
+        "instance_id": "1925",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 2.126994,
+        "tier": "macro",
+        "n_points": 7610,
+        "point_cloud_ratio": 0.852184
+      }
+    ]
+  },
+  {
+    "instance_id": "1961",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "1961",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.402336,
+        "tier": "micro",
+        "n_points": 5906,
+        "point_cloud_ratio": 0.187017
+      },
+      {
+        "instance_id": "1961",
+        "part_id": "link_1:spout",
+        "obb_max_edge_m": 1.078841,
+        "tier": "meso",
+        "n_points": 11146,
+        "point_cloud_ratio": 0.352945
+      },
+      {
+        "instance_id": "1961",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 0.646881,
+        "tier": "micro",
+        "n_points": 14528,
+        "point_cloud_ratio": 0.460038
+      }
+    ]
+  },
+  {
+    "instance_id": "2083",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "2083",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.524675,
+        "tier": "micro",
+        "n_points": 366,
+        "point_cloud_ratio": 0.104661
+      },
+      {
+        "instance_id": "2083",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.992262,
+        "tier": "macro",
+        "n_points": 3131,
+        "point_cloud_ratio": 0.895339
+      }
+    ]
+  },
+  {
+    "instance_id": "2084",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "2084",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.335723,
+        "tier": "micro",
+        "n_points": 2174,
+        "point_cloud_ratio": 0.175153
+      },
+      {
+        "instance_id": "2084",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.335723,
+        "tier": "micro",
+        "n_points": 2174,
+        "point_cloud_ratio": 0.175153
+      },
+      {
+        "instance_id": "2084",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.454801,
+        "tier": "macro",
+        "n_points": 8064,
+        "point_cloud_ratio": 0.649694
+      }
+    ]
+  },
+  {
+    "instance_id": "2115",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "2115",
+        "part_id": "link_0:faucet_base",
+        "obb_max_edge_m": 0.824101,
+        "tier": "micro",
+        "n_points": 256,
+        "point_cloud_ratio": 0.070993
+      },
+      {
+        "instance_id": "2115",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 1.530573,
+        "tier": "macro",
+        "n_points": 3350,
+        "point_cloud_ratio": 0.929007
+      }
+    ]
+  },
+  {
+    "instance_id": "2170",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "2170",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 1.406921,
+        "tier": "micro",
+        "n_points": 1660,
+        "point_cloud_ratio": 0.112879
+      },
+      {
+        "instance_id": "2170",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.812303,
+        "tier": "meso",
+        "n_points": 13046,
+        "point_cloud_ratio": 0.887121
+      }
+    ]
+  },
+  {
+    "instance_id": "693",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "693",
+        "part_id": "link_0:stem",
+        "obb_max_edge_m": 0.445001,
+        "tier": "micro",
+        "n_points": 640,
+        "point_cloud_ratio": 0.030684
+      },
+      {
+        "instance_id": "693",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 1.445453,
+        "tier": "meso",
+        "n_points": 14048,
+        "point_cloud_ratio": 0.673507
+      },
+      {
+        "instance_id": "693",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.381404,
+        "tier": "macro",
+        "n_points": 6170,
+        "point_cloud_ratio": 0.29581
+      }
+    ]
+  },
+  {
+    "instance_id": "822",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "822",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 1.091915,
+        "tier": "meso",
+        "n_points": 2744,
+        "point_cloud_ratio": 0.443869
+      },
+      {
+        "instance_id": "822",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.688133,
+        "tier": "macro",
+        "n_points": 3438,
+        "point_cloud_ratio": 0.556131
+      }
+    ]
+  },
+  {
+    "instance_id": "862",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "862",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.250819,
+        "tier": "micro",
+        "n_points": 659,
+        "point_cloud_ratio": 0.139945
+      },
+      {
+        "instance_id": "862",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.26035,
+        "tier": "micro",
+        "n_points": 673,
+        "point_cloud_ratio": 0.142918
+      },
+      {
+        "instance_id": "862",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.529179,
+        "tier": "macro",
+        "n_points": 3377,
+        "point_cloud_ratio": 0.717137
+      }
+    ]
+  },
+  {
+    "instance_id": "866",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "866",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.408239,
+        "tier": "micro",
+        "n_points": 2325,
+        "point_cloud_ratio": 0.186403
+      },
+      {
+        "instance_id": "866",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.408894,
+        "tier": "micro",
+        "n_points": 2323,
+        "point_cloud_ratio": 0.186242
+      },
+      {
+        "instance_id": "866",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 2.01647,
+        "tier": "macro",
+        "n_points": 7825,
+        "point_cloud_ratio": 0.627355
+      }
+    ]
+  },
+  {
+    "instance_id": "885",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "885",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.509891,
+        "tier": "micro",
+        "n_points": 292,
+        "point_cloud_ratio": 0.129893
+      },
+      {
+        "instance_id": "885",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.509903,
+        "tier": "micro",
+        "n_points": 298,
+        "point_cloud_ratio": 0.132562
+      },
+      {
+        "instance_id": "885",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 1.596626,
+        "tier": "macro",
+        "n_points": 1658,
+        "point_cloud_ratio": 0.737544
+      }
+    ]
+  },
+  {
+    "instance_id": "908",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "908",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.566847,
+        "tier": "micro",
+        "n_points": 452,
+        "point_cloud_ratio": 0.140068
+      },
+      {
+        "instance_id": "908",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.63544,
+        "tier": "micro",
+        "n_points": 860,
+        "point_cloud_ratio": 0.266501
+      },
+      {
+        "instance_id": "908",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.596101,
+        "tier": "meso",
+        "n_points": 1915,
+        "point_cloud_ratio": 0.59343
+      }
+    ]
+  },
+  {
+    "instance_id": "912",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "912",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.625372,
+        "tier": "micro",
+        "n_points": 240,
+        "point_cloud_ratio": 0.27027
+      },
+      {
+        "instance_id": "912",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.742404,
+        "tier": "macro",
+        "n_points": 648,
+        "point_cloud_ratio": 0.72973
+      }
+    ]
+  },
+  {
+    "instance_id": "920",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "920",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.529907,
+        "tier": "micro",
+        "n_points": 1442,
+        "point_cloud_ratio": 0.13807
+      },
+      {
+        "instance_id": "920",
+        "part_id": "link_1:switch",
+        "obb_max_edge_m": 0.529915,
+        "tier": "micro",
+        "n_points": 1476,
+        "point_cloud_ratio": 0.141325
+      },
+      {
+        "instance_id": "920",
+        "part_id": "link_2:faucet_base",
+        "obb_max_edge_m": 0.684725,
+        "tier": "micro",
+        "n_points": 4990,
+        "point_cloud_ratio": 0.477786
+      },
+      {
+        "instance_id": "920",
+        "part_id": "link_3:spout",
+        "obb_max_edge_m": 1.441299,
+        "tier": "micro",
+        "n_points": 2536,
+        "point_cloud_ratio": 0.242819
+      }
+    ]
+  },
+  {
+    "instance_id": "960",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "960",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.711439,
+        "tier": "micro",
+        "n_points": 542,
+        "point_cloud_ratio": 0.14222
+      },
+      {
+        "instance_id": "960",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 0.810814,
+        "tier": "micro",
+        "n_points": 938,
+        "point_cloud_ratio": 0.24613
+      },
+      {
+        "instance_id": "960",
+        "part_id": "link_2:spout",
+        "obb_max_edge_m": 1.465703,
+        "tier": "meso",
+        "n_points": 2331,
+        "point_cloud_ratio": 0.61165
+      }
+    ]
+  },
+  {
+    "instance_id": "991",
+    "category": "Faucet",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "991",
+        "part_id": "link_0:switch",
+        "obb_max_edge_m": 0.927617,
+        "tier": "micro",
+        "n_points": 740,
+        "point_cloud_ratio": 0.347744
+      },
+      {
+        "instance_id": "991",
+        "part_id": "link_1:faucet_base",
+        "obb_max_edge_m": 1.51729,
+        "tier": "macro",
+        "n_points": 1388,
+        "point_cloud_ratio": 0.652256
+      }
+    ]
+  }
+]
