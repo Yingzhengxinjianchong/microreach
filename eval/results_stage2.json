@@ -1,0 +1,150 @@
+{
+  "m0": {
+    "dataset": {
+      "micro_miou": 0.0,
+      "meso_miou": null,
+      "macro_miou": null,
+      "pose_aware_recall_at_1": 0.4667,
+      "pose_aware_recall_at_5": 0.6833,
+      "cascade_consistency_rate": null,
+      "sim_exec_success": null,
+      "n_instances": 6
+    },
+    "instances": [
+      {
+        "instance_id": "1667",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.4,
+        "pose_aware_recall_at_5": 0.6,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "1380",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.4,
+        "pose_aware_recall_at_5": 1.0,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "908",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.1,
+        "pose_aware_recall_at_5": 0.1,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "153",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.7,
+        "pose_aware_recall_at_5": 1.0,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "1832",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 1.0,
+        "pose_aware_recall_at_5": 1.0,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "822",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.2,
+        "pose_aware_recall_at_5": 0.4,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      }
+    ]
+  },
+  "m1": {
+    "dataset": {
+      "micro_miou": 0.0,
+      "meso_miou": null,
+      "macro_miou": null,
+      "pose_aware_recall_at_1": 0.5333,
+      "pose_aware_recall_at_5": 0.7167,
+      "cascade_consistency_rate": null,
+      "sim_exec_success": null,
+      "n_instances": 6
+    },
+    "instances": [
+      {
+        "instance_id": "1667",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.6,
+        "pose_aware_recall_at_5": 0.6,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "1380",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 1.0,
+        "pose_aware_recall_at_5": 1.0,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "908",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.3,
+        "pose_aware_recall_at_5": 0.3,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "153",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.9,
+        "pose_aware_recall_at_5": 1.0,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "1832",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.0,
+        "pose_aware_recall_at_5": 1.0,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      },
+      {
+        "instance_id": "822",
+        "micro_miou": 0.0,
+        "meso_miou": null,
+        "macro_miou": null,
+        "pose_aware_recall_at_1": 0.4,
+        "pose_aware_recall_at_5": 0.4,
+        "cascade_consistency_rate": null,
+        "sim_exec_success": null
+      }
+    ]
+  }
+}

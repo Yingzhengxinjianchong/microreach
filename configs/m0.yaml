@@ -1,0 +1,19 @@
+# M0: 单值 baseline，无 pose decoder
+# 验证目标：pose-condition 必要性
+# 标签：把 24 个 query 的 R_geom 取均值，监督单个标量 R(p)
+# 继承 default.yaml，只 override 下面字段
+
+_base_: default.yaml
+
+variant: m0
+
+model:
+  use_pose_decoder: false           # 关键：砍掉 pose decoder
+
+target_mode: per_point_mean         # GT 取 R_geom.mean(axis=-1)，shape (M,)
+
+train:
+  ckpt_dir: ckpts/m0_seed42
+
+wandb:
+  run_name: gjw_m0_seed42

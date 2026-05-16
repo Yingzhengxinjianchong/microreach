@@ -1,0 +1,94 @@
+# MicroReach 默认共享配置（阶段二中期）
+# 所有其他 yaml (m0/m1/...) 都基于这个 override
+
+# ────────────────────────────────────────
+# 数据接口（必须与 label_gen/batch_generate.py 输出一致）
+# ────────────────────────────────────────
+data:
+  npz_dir: data                     # .npz 标签所在目录（相对 repo 根）
+  num_points: 30000                 # 单实例场景点云规模
+  num_candidate_per_instance: 10    # 每实例候选交互点 M（队友实际生成 10）
+  n_psi: 8                          # Fibonacci 球面采样方向数
+  n_g: 3                            # 抓取类型 (pinch/power/poke)
+  n_queries: 24                     # n_psi * n_g
+  query_dim: 4                      # (ψx, ψy, ψz, g_idx)
+  target_field: R_geom              # 阶段二中期只训这一层
+  fields:                           # .npz key 名映射（避免代码里硬编码）
+    point_cloud: point_cloud        # (N, 3) float32
+    candidate_p: candidate_p        # (M, 3)
+    queries:     queries            # (M, 24, 4)
+    r_geom:      R_geom             # (M, 24) ∈ [0, 1]
+    part_tiers:  part_tiers         # (M,) str — 当前是 'unknown'
+
+# ────────────────────────────────────────
+# 数据划分（按实例 ID 划，避免泄露）
+# ────────────────────────────────────────
+split:
+  ratios: [0.8, 0.1, 0.1]           # train / val / test
+  seed: 42                          # 划分时固定的随机种子（与训练 seed 解耦）
+
+# ────────────────────────────────────────
+# 网络结构（M1 默认值；M0 在 m0.yaml 里 override）
+# ────────────────────────────────────────
+model:
+  feat_dim: 128                     # 融合后几何特征维度
+  use_pose_decoder: true            # M1=true, M0=false（被 m0.yaml override）
+  use_global_branch: false          # 阶段二中期只用 PartField 局部分支
+                                    # 全局 Sparse Conv 分支 P1 选做
+  partfield:
+    pretrained: true                # 使用 NVIDIA 预训练权重
+    freeze: true                    # 冻结 backbone（阶段二节省显存）
+    out_dim: 128
+    local_radius: 0.05              # 候选点周围 5cm 球域
+    local_k: 64                     # 球域内最多采 64 个点
+  pose_decoder:
+    n_heads: 4
+    n_layers: 2
+    pose_token_dim: 128
+  heads:
+    geom: true                      # ✅ 阶段二中期必做
+    contact: false                  # ❌ 推至阶段三
+    exec: false                     # ❌ 推至阶段三
+
+# ────────────────────────────────────────
+# Loss
+# ────────────────────────────────────────
+loss:
+  type: bce                         # binary cross entropy with logits（R_geom 是连续值，BCE 用 soft label 训练）
+  cascade_consistency: false        # 阶段二中期只一层，没有 cascade
+  cascade_mu: 0.0                   # 阶段三启用三层时改 0.1
+
+# ────────────────────────────────────────
+# 训练
+# ────────────────────────────────────────
+train:
+  seed: 42                          # 单 seed（阶段三再扩 42/43/44）
+  batch_size: 4                     # 每 batch 4 个实例
+  num_workers: 2
+  epochs: 100                       # 阶段二中期 100 epoch 够；阶段三 200
+  optimizer: adamw
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  scheduler: cosine
+  warmup_epochs: 5
+  grad_clip: 1.0
+  log_every: 10                     # 每 10 step 打一次 W&B
+  val_every_epoch: 5                # 每 5 epoch 跑一次 val
+  ckpt_dir: ckpts                   # checkpoint 保存目录
+  ckpt_every_epoch: 20
+
+# ────────────────────────────────────────
+# 评测
+# ────────────────────────────────────────
+eval:
+  bce_threshold: 0.5                # Micro-mIoU 的二值化阈值
+  recall_k: [1]                     # 阶段二中期只算 k=1；k=5 推至阶段三
+  micro_only: false                 # 当前 part_tiers 全是 'unknown'，先用所有 part
+
+# ────────────────────────────────────────
+# W&B
+# ────────────────────────────────────────
+wandb:
+  project: microreach
+  entity: null                      # 用个人账号
+  mode: online                      # online / offline / disabled
