@@ -163,6 +163,8 @@ def plot_instance(
     instance: dict,
     pred: np.ndarray,        # (M, K)
     out_dir: Path,
+    out_name: Optional[str] = None,    # 自定义文件名（不含扩展名）；None 则用 polar_<id>
+    variant_label: Optional[str] = None,  # 加到 suptitle 上区分模型（如 "M1 BCE", "M1+composite"）
 ) -> None:
     """画一个实例：每个候选点一对 (GT, PRED) panel。"""
     gt = instance["R_geom"]                          # (M, K)
@@ -183,17 +185,23 @@ def plot_instance(
             axes[i, 0], queries[i], gt[i],
             title=f"GT  | part={part_ids[i]} tier={tiers[i]}",
         )
+        pred_title = f"PRED | part={part_ids[i]} tier={tiers[i]}"
+        if variant_label:
+            pred_title = f"PRED ({variant_label}) | part={part_ids[i]} tier={tiers[i]}"
         plot_polar_for_point(
             axes[i, 1], queries[i], pred[i],
-            title=f"PRED | part={part_ids[i]} tier={tiers[i]}",
+            title=pred_title,
         )
 
-    fig.suptitle(f"Instance {instance_id} | M={M} candidate points × {K} queries",
-                 fontsize=12, y=1.0)
+    suptitle = f"Instance {instance_id} | M={M} candidate points × {K} queries"
+    if variant_label:
+        suptitle += f"  [{variant_label}]"
+    fig.suptitle(suptitle, fontsize=12, y=1.0)
     fig.tight_layout()
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"polar_{instance_id}.png"
+    fname = (out_name or f"polar_{instance_id}") + ".png"
+    out_path = out_dir / fname
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"[saved] {out_path}")
@@ -206,16 +214,21 @@ def plot_instance(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", type=str, required=True,
-                        help="实例 ID，如 153 / 1741")
+                        help="实例 ID，如 153 / 1380")
     parser.add_argument("--ckpt", type=str, required=True)
     parser.add_argument("--config", type=str, required=True)
     parser.add_argument("--out", type=str, default="viz/figs")
+    parser.add_argument("--out_name", type=str, default=None,
+                        help="自定义输出文件名（不含 .png 后缀）。None 用 polar_<instance>")
+    parser.add_argument("--variant_label", type=str, default=None,
+                        help="模型标签，会写在 PRED panel 标题和 suptitle 上（如 'M1 BCE' / 'M1+composite'）")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     instance = load_instance(args.instance)
     pred = predict_one(args.ckpt, args.config, instance, device)
-    plot_instance(args.instance, instance, pred, _REPO_ROOT / args.out)
+    plot_instance(args.instance, instance, pred, _REPO_ROOT / args.out,
+                  out_name=args.out_name, variant_label=args.variant_label)
 
 
 if __name__ == "__main__":
