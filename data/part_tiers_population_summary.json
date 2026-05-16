@@ -1,0 +1,13 @@
+{
+  "num_npz": 47,
+  "candidate_level_tier_counts": {
+    "micro": 291,
+    "meso": 55,
+    "macro": 5
+  },
+  "mapping_methods": {
+    "shift_minus_2": 288,
+    "instance_semantic": 63
+  },
+  "notes": "part_tiers populated by shift_minus_2, instance semantic fallback, then global semantic fallback"
+}

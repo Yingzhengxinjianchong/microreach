@@ -43,3 +43,6 @@ assets/franka/panda_v2_gripper.urdf
 assets/franka/panda_v3.*
 assets/franka/realsense2_description/
 assets/franka/sciurus17_description/
+
+# Local backup generated before patching part_tiers
+data/npz_before_part_tiers/
