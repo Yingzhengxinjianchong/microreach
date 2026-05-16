@@ -146,6 +146,8 @@ def set_seed(seed: int) -> None:
 def train_one_epoch(
     model, loader, optimizer, device, scheduler=None, grad_clip=1.0, log_every=10,
     use_wandb=False, epoch=0,
+    loss_type="bce", focal_alpha=0.75, focal_gamma=2.0,
+    composite_weights=None,
 ):
     model.train()
     total_loss = 0.0
@@ -165,7 +167,11 @@ def train_one_epoch(
         else:
             logits = model(pc, cp)
 
-        out = microreach_loss_geom_only(logits, tgt, mask)
+        out = microreach_loss_geom_only(
+            logits, tgt, mask,
+            loss_type=loss_type, focal_alpha=focal_alpha, focal_gamma=focal_gamma,
+            composite_weights=composite_weights,
+        )
         loss = out["loss"]
 
         optimizer.zero_grad()
@@ -198,7 +204,9 @@ def train_one_epoch(
 
 
 @torch.no_grad()
-def validate(model, loader, device) -> Dict[str, float]:
+def validate(model, loader, device,
+             loss_type="bce", focal_alpha=0.75, focal_gamma=2.0,
+             composite_weights=None) -> Dict[str, float]:
     model.eval()
     total_loss = 0.0
     n_batches = 0
@@ -217,7 +225,11 @@ def validate(model, loader, device) -> Dict[str, float]:
         else:
             logits = model(pc, cp)
 
-        out = microreach_loss_geom_only(logits, tgt, mask)
+        out = microreach_loss_geom_only(
+            logits, tgt, mask,
+            loss_type=loss_type, focal_alpha=focal_alpha, focal_gamma=focal_gamma,
+            composite_weights=composite_weights,
+        )
         total_loss += out["loss"].item()
         n_batches += 1
 
@@ -344,6 +356,20 @@ def main():
     ckpt_dir = repo_root / cfg["train"]["ckpt_dir"]
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
+    # Loss 配置（"bce" | "focal" | "composite"）
+    loss_cfg = cfg.get("loss", {})
+    loss_type = loss_cfg.get("type", "bce")
+    focal_alpha = loss_cfg.get("focal_alpha", 0.75)
+    focal_gamma = loss_cfg.get("focal_gamma", 2.0)
+    composite_weights = loss_cfg.get("composite_weights", None)
+    if loss_type == "focal":
+        print(f"Loss: type=focal, alpha={focal_alpha}, gamma={focal_gamma}")
+    elif loss_type == "composite":
+        w = composite_weights or {"bce": 0.3, "dice": 0.3, "focal": 0.2, "iou": 0.2}
+        print(f"Loss: type=composite, weights={w}, focal(α={focal_alpha}, γ={focal_gamma})")
+    else:
+        print(f"Loss: type={loss_type}")
+
     # 训练循环
     best_iou = -1.0
     for epoch in range(n_epochs):
@@ -352,12 +378,16 @@ def main():
             grad_clip=cfg["train"]["grad_clip"],
             log_every=cfg["train"]["log_every"],
             use_wandb=use_wandb, epoch=epoch,
+            loss_type=loss_type, focal_alpha=focal_alpha, focal_gamma=focal_gamma,
+            composite_weights=composite_weights,
         )
         print(f"[epoch {epoch}] train_loss={train_stat['train_loss_avg']:.4f}  time={train_stat['epoch_time']:.1f}s")
 
         # 验证
         if epoch % cfg["train"]["val_every_epoch"] == 0 or epoch == n_epochs - 1:
-            val_stat = validate(model, val_loader, device)
+            val_stat = validate(model, val_loader, device,
+                                loss_type=loss_type, focal_alpha=focal_alpha, focal_gamma=focal_gamma,
+                                composite_weights=composite_weights)
             print(f"  val_loss={val_stat['val_loss']:.4f}  iou@0.5={val_stat['val_iou@0.5']:.4f}  recall@1={val_stat['val_recall@1']:.4f}")
             if use_wandb:
                 import wandb

@@ -1,0 +1,38 @@
+# M1 + Composite Loss (TASA AAAI 2026 Eq. 11 风格)
+#
+# L_total = 0.3 · L_BCE + 0.3 · L_Dice + 0.2 · L_Focal + 0.2 · L_IoU
+#
+# 设计依据 (TASA: Task-Aware 3D Affordance Segmentation, AAAI 2026):
+#   - L_BCE   (0.3): 像素级分类基础信号
+#   - L_Dice  (0.3): 直接对抗类别不平衡 (R_geom mean=0.155, 27% 正样本)
+#   - L_Focal (0.2): 难样本加权 (α=0.75 偏向正样本)
+#   - L_IoU   (0.2): 直接优化 IoU 指标 (与 Micro-mIoU 评测目标对齐)
+#
+# 期望效果:
+#   - Micro-mIoU > 0.20 (m1_focal 是 0.13, m1 BCE 是 0.02)
+#   - Recall@1 ≥ 0.50 (不能比 m1 BCE 0.533 掉太多)
+
+_base_: default.yaml
+
+variant: m1_composite
+
+model:
+  use_pose_decoder: true
+
+target_mode: per_query
+
+loss:
+  type: composite
+  focal_alpha: 0.75
+  focal_gamma: 2.0
+  composite_weights:                  # TASA 论文权重
+    bce:   0.3
+    dice:  0.3
+    focal: 0.2
+    iou:   0.2
+
+train:
+  ckpt_dir: ckpts/m1_composite_seed42
+
+wandb:
+  run_name: gjw_m1_composite_seed42

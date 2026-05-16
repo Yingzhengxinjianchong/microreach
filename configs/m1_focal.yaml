@@ -1,0 +1,24 @@
+# M1 + Focal Loss: 修复 BCE on imbalanced soft labels 导致的 sigmoid 压低问题
+# 数据 R_geom mean=0.155，nonzero rate=27%，正样本稀少
+# 标准 BCE 让 M1 学到了"相对排序"（Recall 高）但绝对值偏低（Micro-mIoU=0.02 vs M0 0.26 反转）
+# Focal loss (α=0.75 偏向正样本, γ=2 关注难样本) 期望让 sigmoid 输出抬高 → mIoU 不再反转
+
+_base_: default.yaml
+
+variant: m1_focal
+
+model:
+  use_pose_decoder: true              # 跟 m1.yaml 完全一样
+
+target_mode: per_query                # 同 m1
+
+loss:
+  type: focal                         # ← 关键 override（default.yaml 是 bce）
+  focal_alpha: 0.75                   # 正样本 α
+  focal_gamma: 2.0                    # focal 调节强度（论文标准）
+
+train:
+  ckpt_dir: ckpts/m1_focal_seed42
+
+wandb:
+  run_name: gjw_m1_focal_seed42
