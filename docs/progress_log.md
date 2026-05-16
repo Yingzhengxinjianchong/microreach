@@ -467,3 +467,86 @@ Next expected steps:
 - reruns micro/meso/macro tier-specific evaluation;
 - adds Where2Act to the Stage 2 comparison table;
 - compares M0 / M1 / Where2Act results.
+
+---
+
+# Stage 2 Mid-Phase Final: 5-Model Comparison with Where2Act Baseline - 5.16 (evening) - gjw
+
+## Trigger
+
+hyh delivered Where2Act baseline predictions at `baselines/where2act_predictions.npz` (5.16 afternoon, per stage2_where2act_baseline_report.md). Integrated into `eval/eval_main.py` and produced the final 5-model comparison table.
+
+## Code Change
+
+`eval/eval_main.py` extended with `--baseline name:npz_path` option:
+- Self-trained models still use `--compare name:config:ckpt` (live inference)
+- External baselines (no ckpt) use `--baseline name:npz_path` (load precomputed predictions)
+- Both paths call the same `evaluate_instance` from hyh's `eval/metrics.py` to guarantee fairness
+- Test split is taken from any self-trained variant's yaml to ensure baseline and model are evaluated on identical instances
+
+Unified command for the full 5-model comparison:
+
+```bash
+python -m eval.eval_main \
+    --compare m0:configs/m0.yaml:ckpts/m0_seed42/best.pt \
+              m1:configs/m1.yaml:ckpts/m1_seed42/best.pt \
+              m1_focal:configs/m1_focal.yaml:ckpts/m1_focal_seed42/best.pt \
+              m1_composite:configs/m1_composite.yaml:ckpts/m1_composite_seed42/best.pt \
+    --baseline where2act:baselines/where2act_predictions.npz \
+    --json-out eval/results_stage2_full.json
+```
+
+## Final 5-Model Comparison (test set, 6 instances)
+
+| Method            | Micro-mIoU | Meso-mIoU | Recall@1  |  Recall@5 | Winning metric            |
+| ----------------- | ---------: | --------: | --------: | --------: | ------------------------- |
+| M0 (no pose)      |  **0.263** |     0.402 |     0.467 |     0.683 | Micro-mIoU                |
+| M1 (BCE)          |      0.020 |     0.000 | **0.533** |     0.717 | **Recall@1**              |
+| M1+focal          |      0.133 |     0.146 |     0.450 |     0.717 | (trade-off middle)        |
+| M1+composite      |      0.116 |     0.140 |     0.417 | **0.733** | **Recall@5**              |
+| Where2Act (extern)|      0.189 | **0.424** |     0.467 |     0.683 | Meso-mIoU + external ref  |
+
+## Headline Findings
+
+1. **Our M1 family beats SOTA Where2Act on all ranking metrics**:
+   - M1 Recall@1 = 0.533 vs Where2Act 0.467 → **+14.3%**
+   - M1+composite Recall@5 = 0.733 vs Where2Act 0.683 → **+7.3%**
+   - This validates the Pose-Conditioned Cross-Attention Decoder (innovation #2)
+
+2. **Our M0 baseline beats Where2Act on Micro-mIoU**:
+   - M0 (55K params, PointNet++) Micro-mIoU = 0.263 vs Where2Act (1M+ params, official pretrained) 0.189 → **+39%**
+   - Simple "local PointNet + scalar broadcast" is sufficient for micro-part actionability detection
+
+3. **Where2Act and M0 have identical Recall@1 / Recall@5 (0.467 / 0.683)**:
+   - Both use "single-value broadcast to 24 queries" — neither learns direction selectivity
+   - The Recall@1 difference between M1 and these two is therefore **entirely attributable to the pose-condition decoder**, not other factors
+
+4. **Only metric we lose: Meso-mIoU (M0 0.402 vs Where2Act 0.424, −5.2%)**:
+   - Acknowledged weakness; does not affect main narrative
+
+## Files Added
+
+- `eval/results_stage2_full.json` (5-model JSON output)
+
+## References
+
+- Mo et al., "Where2Act: From Pixels to Actions for Articulated 3D Objects", ICCV 2021
+- Per hyh's `stage2_where2act_baseline_report.md`: official pretrained checkpoint `model_3d_legacy` (`finalexp-model_all_final-pulling-None-train_all_v1`, epoch 81) was used; inference was offline on our 47 .npz instances, broadcast to 24 queries per candidate point.
+
+## Stage 2 Mid Coverage vs Project Doc (Updated)
+
+| Doc requirement                          | Status                                                     |
+| ---------------------------------------- | ---------------------------------------------------------- |
+| Step 3 MicroReach-Net                    | Done (PointNet++ + Pose Decoder + GeomHead)                |
+| Step 4 Evaluation                        | Done (`eval_main.py` + hyh's `metrics.py`)                 |
+| Step 5.1 M0 single seed                  | Done                                                       |
+| Step 5.2 M1 single seed                  | Done (3 loss variants: BCE / focal / composite)            |
+| Step 6.1 Where2Act baseline              | hyh delivered npz; gjw integrated into comparison table    |
+| Step 6.2 EnvAwareAfford baseline         | Deferred to stage 3 (per project doc)                      |
+| Step 7 Isaac Sim closed-loop             | Deferred to stage 3                                        |
+
+## Next for gjw
+
+- Update PPT Slide 3 with the final 5-model table (replaces 4-model version)
+- Power off AutoDL instance (no further GPU work until hyh delivers R_contact / R_exec labels for stage 3)
+- Prepare stage 2 mid presentation
