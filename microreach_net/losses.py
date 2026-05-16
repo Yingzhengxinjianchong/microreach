@@ -35,13 +35,59 @@ def masked_bce_with_logits(
     return raw.sum() / (mask.sum() + eps)
 
 
+def masked_focal_loss_with_logits(
+    logits: torch.Tensor,        # (..., )
+    targets: torch.Tensor,       # 同 logits shape, soft label ∈ [0, 1]
+    mask: torch.Tensor,          # broadcast 到 logits shape
+    alpha: float = 0.75,         # 正样本权重（数据 27% 正 → 偏向正样本）
+    gamma: float = 2.0,          # focal 调节强度（论文默认）
+    eps: float = 1e-8,
+) -> torch.Tensor:
+    """
+    Soft-label adapted Focal Loss (Lin et al. ICCV 2017).
+
+    解决 R_geom 数据 mean=0.155 + BCE → sigmoid 被压低 + 二值化后 mIoU 极低 的问题。
+
+    公式（soft label 版）：
+        p = sigmoid(logits)
+        loss = -[α·(1-p)^γ·y·log(p) + (1-α)·p^γ·(1-y)·log(1-p)]
+
+    关键点：
+        - α=0.75: 正样本（高 R_geom）loss 加权，补偿样本不平衡
+        - γ=2.0: 难样本（pred 离 gt 远）loss 加权，pull pred 靠近 gt
+        - soft label 适配：保留 y · log(p) + (1-y) · log(1-p) 的连续性
+    """
+    p = torch.sigmoid(logits)
+    p = p.clamp(min=eps, max=1.0 - eps)
+
+    # soft-label cross entropy（不离散化）
+    ce_pos = -targets * torch.log(p)               # y · log(p)
+    ce_neg = -(1.0 - targets) * torch.log(1.0 - p)  # (1-y) · log(1-p)
+
+    # focal factor: 难样本（pred 偏离）权重 ↑
+    focal_pos = (1.0 - p) ** gamma
+    focal_neg = p ** gamma
+
+    # alpha 平衡：正样本 α，负样本 (1-α)
+    loss = alpha * focal_pos * ce_pos + (1.0 - alpha) * focal_neg * ce_neg
+
+    loss = loss * mask
+    return loss.sum() / (mask.sum() + eps)
+
+
 def microreach_loss_geom_only(
     pred_geom: torch.Tensor,         # (B, M, K) for M1 or (B, M) for M0  — logits
     target_geom: torch.Tensor,       # 同 pred_geom shape — ∈ [0, 1]
     mask: torch.Tensor,              # (B, M)  1=valid candidate point, 0=pad
+    loss_type: str = "bce",          # "bce" | "focal"
+    focal_alpha: float = 0.75,
+    focal_gamma: float = 2.0,
 ) -> Dict[str, torch.Tensor]:
     """
     阶段二中期主 loss。
+
+    Args:
+        loss_type: "bce" (默认，与之前训练一致) 或 "focal" (修复 mIoU 偏低)
 
     返回 dict 方便 train.py 打 W&B：
         'loss':        总 loss（即 L_geom）
@@ -54,7 +100,16 @@ def microreach_loss_geom_only(
         # M0: (B, M)
         mask_expand = mask                                            # (B, M)
 
-    l_geom = masked_bce_with_logits(pred_geom, target_geom, mask_expand)
+    if loss_type == "bce":
+        l_geom = masked_bce_with_logits(pred_geom, target_geom, mask_expand)
+    elif loss_type == "focal":
+        l_geom = masked_focal_loss_with_logits(
+            pred_geom, target_geom, mask_expand,
+            alpha=focal_alpha, gamma=focal_gamma,
+        )
+    else:
+        raise ValueError(f"loss_type 必须是 'bce' 或 'focal'，得到 {loss_type!r}")
+
     return {
         "loss": l_geom,
         "l_geom": l_geom.detach(),
