@@ -159,7 +159,7 @@ Both use relative `vmax` per panel (R_geom mean is only 0.155, so absolute [0, 1
 ## Asks for hyh (Stage 2 Mid follow-ups)
 
 1. **Populate `part_tiers` field in .npz**: the 85/14/32 micro/meso/macro distribution already exists in `data/eval_set_47_faucet_relative_success.json` — just needs to be written into per-instance .npz. Once done, gjw will rerun `eval_main.py` and Micro-mIoU / Meso-mIoU / Macro-mIoU will populate automatically.
-2. **Where2Act baseline** (project doc step 6.1, assigned to hyh): save inference results to `baselines/where2act_predictions.npz` so it can be added as a row in the comparison table.
+2. **Where2Act baseline** (project doc step 6.1, assigned to hyh): save inference results to `eval/results/where2act_predictions.npz` so it can be added as a row in the comparison table.
 
 ## Next for gjw
 
@@ -167,3 +167,213 @@ Both use relative `vmax` per panel (R_geom mean is only 0.155, so absolute [0, 1
 - AutoDL instance powered off to save GPU time; will reopen when hyh updates tiers or new training is needed
 - Stage 3 prep: M2 (R_geom + R_contact) and M_full (three-level cascade) training, blocked on hyh's R_contact + R_exec label completion
 - Optional stage 2 P1 if time permits: add a simple global branch (e.g. PointNet over downsampled scene) to fusion.py to instantiate Cross-Scale Fusion (innovation #1)
+
+#  Stage 2 Follow-up: Polar Visualizations, `part_tiers` Patch, and Where2Act Baseline - 5.16 - hyh
+
+## 1. Added polar visualizations for `R_geom`
+
+Added polar visualizations for the Stage 2 `R_geom(p, ψ, g)` labels.
+
+Visualization setup:
+
+- each figure corresponds to one representative candidate point;
+- angular bins correspond to the 8 sampled `ψ` directions;
+- radial rings correspond to the 3 `g` configurations;
+- color indicates the `R_geom` score;
+- instances and candidates are selected automatically to avoid degenerate all-zero or all-one visualizations.
+
+Related files:
+
+```text
+tools/auto_select_and_plot_polar.py
+data/polar_figs_auto/
+data/polar_figs_auto/selection_summary.txt
+```
+
+These figures are intended for presentation/debugging purposes and show that the generated `R_geom` labels contain non-trivial pose-conditioned structure.
+
+---
+
+## 2. Patched `part_tiers` in Stage 2 `.npz` files
+
+Member B found that the `part_tiers` field in the 47 generated `.npz` files was still set to `unknown`, which caused empty micro/meso/macro masks during evaluation.
+
+This update populates `part_tiers` in all 47 Stage 2 `.npz` files using the tier annotations from:
+
+```text
+data/eval_set_47_faucet_relative_success.json
+```
+
+During the patching process, we found that the `part_ids` stored in `.npz` files use a shifted link index compared with the eval-set JSON. For example:
+
+```text
+npz:      link_2:switch
+eval set: link_0:switch
+```
+
+The patch script therefore uses:
+
+1. `link_idx - 2` mapping;
+2. instance-level semantic fallback for remaining unmatched parts;
+3. a final check to ensure no candidate keeps `unknown` tier.
+
+Final candidate-level tier statistics:
+
+```text
+npz files: 47
+candidate-level part_tiers:
+  micro: 291
+  meso : 55
+  macro: 5
+unknown count: 0
+```
+
+Related files:
+
+```text
+tools/populate_part_tiers.py
+data/part_tiers_population_summary.json
+data/*.npz
+```
+
+This fixes the empty micro/meso/macro evaluation masks and allows Member B to rerun the tier-specific metrics.
+
+---
+
+## 3. Reproduced the Where2Act baseline
+
+Reproduced the official Where2Act baseline using the released pretrained checkpoint.
+
+Official repository:
+
+```text
+https://github.com/daerduoCarey/where2act
+```
+
+Downloaded and unpacked the official pretrained logs:
+
+```text
+final_logs.zip
+```
+
+Checkpoint used:
+
+```text
+exp_name    = finalexp-model_all_final-pulling-None-train_all_v1
+model_epoch = 81
+model       = model_3d_legacy
+```
+
+Checkpoint files:
+
+```text
+/root/autodl-tmp/where2act/code/logs/finalexp-model_all_final-pulling-None-train_all_v1/conf.pth
+/root/autodl-tmp/where2act/code/logs/finalexp-model_all_final-pulling-None-train_all_v1/ckpts/81-network.pth
+```
+
+### Environment notes
+
+The original Where2Act code depends on the old SAPIEN 0.8 Optifuser APIs, while our current server environment uses SAPIEN 2.x. As a result, the original visualization/simulation script cannot be run directly.
+
+Instead, we use offline inference:
+
+```text
+load the official pretrained Where2Act model
+bypass the old SAPIEN simulation/visualization environment
+run actionability inference directly on our 47 MicroReach .npz point clouds
+```
+
+The PointNet2 CUDA extension was also patched for the RTX 4090 / CUDA 12.1 environment:
+
+- removed unsupported old CUDA architecture targets such as `compute_37`;
+- set the build architecture to `TORCH_CUDA_ARCH_LIST=8.9`;
+- patched the PointNet2 Lightning `hparams` compatibility issue by using a plain `nn.Module` inheritance path;
+- verified that the official checkpoint loads with all keys matched.
+
+Verification:
+
+```text
+pointnet2 import ok
+Where2Act Network import ok
+network created
+load_state_dict return: <All keys matched successfully>
+```
+
+### Inference output
+
+Where2Act predicts point-level actionability:
+
+```text
+P(action | p)
+```
+
+MicroReach uses pose-conditioned labels:
+
+```text
+R_geom(p, ψ, g)
+```
+
+Therefore, for evaluation, the Where2Act score is treated as a non-pose-conditioned `R(p)` baseline and broadcast to all 24 pose queries:
+
+```text
+Where2Act(p, ψ, g) = Where2Act(p)
+```
+
+Generated file:
+
+```text
+eval/results/where2act_predictions.npz
+```
+
+Output check:
+
+```text
+baseline: Where2Act
+instances: 47
+padded_predictions: (47, 15, 24)
+padded_targets: (47, 15, 24)
+padded_valid_mask: (47, 15)
+score range: 0.040323596 0.83731
+```
+
+Related files:
+
+```text
+baselines/run_where2act_infer.py
+eval/results/where2act_predictions.npz
+docs/stage2_where2act_baseline_report.md
+```
+
+The output is ready for Member B to plug into `eval_main.py` and add Where2Act as a comparison-table row. Since Where2Act does not output pose-conditioned predictions, Pose-Aware Recall should be marked as N/A.
+
+---
+
+## 4. Summary of this follow-up
+
+This follow-up completed three Stage 2 Member-A deliverables:
+
+```text
+✓ added R_geom polar visualizations
+✓ patched part_tiers in all 47 Stage 2 .npz files
+✓ reproduced Where2Act with the official pretrained checkpoint and produced baseline predictions
+```
+
+New or updated deliverables:
+
+```text
+data/*.npz
+data/part_tiers_population_summary.json
+data/polar_figs_auto/
+eval/results/where2act_predictions.npz
+baselines/run_where2act_infer.py
+tools/populate_part_tiers.py
+tools/auto_select_and_plot_polar.py
+docs/stage2_where2act_baseline_report.md
+```
+
+Next expected steps:
+
+- Member B pulls the latest `main`;
+- reruns micro/meso/macro tier-specific evaluation;
+- adds Where2Act to the Stage 2 comparison table;
+- compares M0 / M1 / Where2Act results.
