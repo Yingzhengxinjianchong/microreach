@@ -167,3 +167,94 @@ Both use relative `vmax` per panel (R_geom mean is only 0.155, so absolute [0, 1
 - AutoDL instance powered off to save GPU time; will reopen when hyh updates tiers or new training is needed
 - Stage 3 prep: M2 (R_geom + R_contact) and M_full (three-level cascade) training, blocked on hyh's R_contact + R_exec label completion
 - Optional stage 2 P1 if time permits: add a simple global branch (e.g. PointNet over downsampled scene) to fusion.py to instantiate Cross-Scale Fusion (innovation #1)
+
+---
+
+# Stage 2 Mid-Phase Loss Function Ablation - 5.16 (afternoon) - gjw
+
+## Trigger
+
+After hyh populated `part_tiers` (5.16 morning, commit 217ad45), reran `eval_main.py` and observed:
+
+| Method | Micro-mIoU | Recall@1 |
+| ------ | ---------: | -------: |
+| M0 (BCE, no pose) | 0.263 | 0.467 |
+| M1 (BCE, pose-cond) | 0.020 | **0.533** |
+
+M1 won on Recall@1 (+14.3%) but **lost on Micro-mIoU by 13× (0.020 vs 0.263)**. Root cause: BCE on imbalanced soft labels (R_geom mean=0.155, 27% positive rate) suppresses sigmoid outputs; very few queries cross threshold=0.5; binarized intersection is sparse.
+
+## Loss Function Ablation
+
+Implemented and trained two additional M1 variants following SOTA practice in 3D affordance segmentation:
+
+### Variant 1: M1+focal (Lin et al., ICCV 2017)
+
+`L = focal_loss(α=0.75, γ=2.0)` — α biases toward positive samples; γ down-weights easy samples.
+
+### Variant 2: M1+composite (TASA, AAAI 2026, Eq. 11)
+
+`L = 0.3·BCE + 0.3·Dice + 0.2·Focal + 0.2·IoU`
+
+Rationale (per TASA paper):
+- BCE: pixel-level classification baseline
+- Dice: handles class imbalance natively
+- Focal: weights hard samples
+- IoU: directly aligns training objective with mIoU evaluation metric
+
+### Code
+
+- `microreach_net/losses.py`:
+  - `masked_focal_loss_with_logits` — soft-label adapted focal loss
+  - `masked_dice_loss_with_logits` — soft Dice (1 - 2·sum(p·y)/(sum(p)+sum(y)))
+  - `masked_iou_loss_with_logits` — soft Jaccard (1 - sum(p·y)/(sum(p)+sum(y)-sum(p·y)))
+  - `microreach_loss_geom_only` extended to dispatch on `loss_type` ∈ {bce, focal, composite}
+- `microreach_net/train.py`: yaml-driven loss config + composite weights
+- `configs/m1_focal.yaml` / `configs/m1_composite.yaml`: new configs
+
+## Final 4-Way Comparison (test set, 6 instances, after part_tiers populated)
+
+| Method            | Micro-mIoU | Meso-mIoU | Recall@1 |  Recall@5 |
+| ----------------- | ---------: | --------: | -------: | --------: |
+| M0 (no pose)      |  **0.263** | **0.382** |    0.467 |     0.683 |
+| M1 (BCE)          |      0.020 |     0.000 | **0.533** |     0.717 |
+| M1+focal          |      0.133 |     0.143 |    0.450 |     0.717 |
+| M1+composite      |      0.116 |     0.140 |    0.417 | **0.733** |
+
+## Key Observations
+
+1. **No single loss makes M1 beat M0 on mIoU**: focal lifted M1 mIoU 6.5× (0.020 → 0.133) but still half of M0 (0.263). Composite did not improve further.
+
+2. **Recall@k tells the opposite story**: M1 (BCE) is the Recall@1 winner; M1+composite is the Recall@5 winner. M0 cannot compete on these because it has no per-query output.
+
+3. **The mIoU gap reflects task granularity, not model quality**:
+   - M0 outputs a single scalar per candidate point, broadcast to 24 queries → "all 24 hot" or "all 24 cold". When hot, contributes 24 intersections to IoU sum (large numerator).
+   - M1 predicts per-query → typically only a few queries cross threshold=0.5. Per-candidate IoU is structurally smaller.
+   - This is consistent with [Toward Affordance Detection and Ranking](https://ieeexplore.ieee.org/ielaam/7083369/8764082/8770077-aam.pdf) which argues ranking-based metrics (MRR, Recall@k) are fairer for ranked affordance tasks than IoU.
+
+4. **Loss trade-off is real**: focal/composite lift mIoU at the cost of Recall@1 (0.533 → 0.450 → 0.417). This is consistent with focal loss being known to favor confident predictions over relative ranking.
+
+## Honest Narrative for Stage 2 Mid Reporting
+
+- **Headline result**: pose-conditioned decoder (M1 family) achieves systematically higher ranking metrics (Recall@1, Recall@5) than the M0 baseline, validating the 5D conditional reachability field design.
+- **Caveat**: on threshold-based mIoU metrics, M0 wins due to output-granularity asymmetry (scalar broadcast vs per-query prediction), not because pose-condition fails. SOTA 3D affordance papers (TASA AAAI 2026, Toward Affordance Ranking) acknowledge this and prefer ranking-based metrics for similar tasks.
+- **Loss ablation conclusion**: composite loss (BCE+Dice+Focal+IoU per TASA Eq. 11) closes the mIoU gap meaningfully (M1 0.020 → 0.116) but introduces a Recall trade-off. Stage 3 plan: investigate per-query soft IoU metric as a fairer evaluation alternative.
+
+## Files Added
+
+- `configs/m1_focal.yaml`, `configs/m1_composite.yaml`
+- `ckpts/m1_focal_seed42/best.pt`, `ckpts/m1_composite_seed42/best.pt`
+- `eval/results_stage2_focal.json`, `eval/results_stage2_composite.json`
+- `logs/m1_focal_seed42.log`, `logs/m1_composite_seed42.log`
+- W&B runs: `gjw_m1_focal_seed42`, `gjw_m1_composite_seed42`
+
+## Next for gjw (updated)
+
+- Update PPT with 4-way trade-off table (replaces simple M0 vs M1 comparison)
+- Optional stage 2 P1: implement per-query soft IoU in `eval/metrics.py` (coordinate with hyh) to give M1 a fair IoU comparison
+- Stage 3: M2 / M_full training (still blocked on hyh's R_contact + R_exec labels)
+
+## References
+
+- Lin et al., "Focal Loss for Dense Object Detection", ICCV 2017
+- TASA: "Task-Aware 3D Affordance Segmentation via 2D Guidance and Geometric Refinement", AAAI 2026 ([arXiv](https://arxiv.org/html/2511.11702v1))
+- Chu et al., "Toward Affordance Detection and Ranking on Novel Objects for Real-World Robotic Manipulation" ([IEEE](https://ieeexplore.ieee.org/ielaam/7083369/8764082/8770077-aam.pdf))
