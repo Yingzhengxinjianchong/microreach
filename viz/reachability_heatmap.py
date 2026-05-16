@@ -99,25 +99,30 @@ def plot_polar_for_point(
     n_psi: int = 8,
     n_g: int = 3,
     cmap_name: str = "Reds",
+    vmax: Optional[float] = None,    # 颜色映射的最大值；None 表示用 scores.max()
 ) -> None:
     """
     在 ax 上画一个极坐标玫瑰图：
         - 角度：从 queries[:, :3] 的方向 ψ 投影到方位角 φ = atan2(ψ_y, ψ_x)
         - 径向：g_idx ∈ {0,1,2} 对应内 / 中 / 外圈
-        - 颜色：scores
+        - 颜色：scores 经过 [0, vmax] 归一化后映射
+
+    重要：vmax 默认 = scores.max()（相对归一化），让 PRED 也能看出方向选择性。
+    R_geom 数据 mean 只有 0.155，绝对映射 [0, 1] 会让 PRED 颜色非常浅，
+    看不出"哪个方向相对最高"。
     """
-    # 按 query 顺序解析 ψ 和 g
     psi = queries[:, :3]
     g_idx = queries[:, 3].astype(int)
-
-    # 方位角 φ ∈ [-π, π]
     phi = np.arctan2(psi[:, 1], psi[:, 0])
 
     cmap = plt.get_cmap(cmap_name)
+    if vmax is None:
+        vmax = max(float(scores.max()), 1e-6)
 
-    # 对每个 g 圈，画 8 个扇形
+    # 标题里加上 vmax 提示，让看图人知道这是"相对"颜色
+    title_with_vmax = f"{title}  (vmax={vmax:.3f})"
+
     for g in range(n_g):
-        # 取当前 g 的 8 个 query
         mask = g_idx == g
         phi_g = phi[mask]
         score_g = scores[mask]
@@ -125,22 +130,22 @@ def plot_polar_for_point(
         r_inner = 0.2 + 0.25 * g
         r_outer = 0.2 + 0.25 * (g + 1)
 
-        # 扇形宽度 = 2π/8
         sector_width = 2 * np.pi / n_psi
 
-        # 按 phi 排序，避免扇形交叉
         order = np.argsort(phi_g)
         phi_sorted = phi_g[order]
         score_sorted = score_g[order]
 
-        for j, (p, s) in enumerate(zip(phi_sorted, score_sorted)):
+        for p, s in zip(phi_sorted, score_sorted):
+            # 归一化到 [0.15, 1.0]，避免低分扇区完全空白看不见
+            normalized = 0.15 + 0.85 * (s / vmax)
+            normalized = float(np.clip(normalized, 0.0, 1.0))
             ax.bar(
                 p, r_outer - r_inner, width=sector_width,
-                bottom=r_inner, color=cmap(s),
+                bottom=r_inner, color=cmap(normalized),
                 edgecolor="white", linewidth=0.5,
             )
 
-    # 用文字标注 3 个 g 圈
     g_labels = ["pinch", "power", "poke"]
     for g, label in enumerate(g_labels):
         ax.text(0, 0.2 + 0.25 * (g + 0.5), label,
@@ -150,7 +155,7 @@ def plot_polar_for_point(
     ax.set_yticks([])
     ax.set_xticks(np.linspace(0, 2 * np.pi, n_psi, endpoint=False))
     ax.set_xticklabels([f"ψ{i}" for i in range(n_psi)], fontsize=7)
-    ax.set_title(title, fontsize=9, pad=10)
+    ax.set_title(title_with_vmax, fontsize=9, pad=10)
 
 
 def plot_instance(
