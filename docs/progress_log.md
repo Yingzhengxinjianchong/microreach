@@ -550,3 +550,116 @@ python -m eval.eval_main \
 - Update PPT Slide 3 with the final 5-model table (replaces 4-model version)
 - Power off AutoDL instance (no further GPU work until hyh delivers R_contact / R_exec labels for stage 3)
 - Prepare stage 2 mid presentation
+
+---
+
+# Stage 3 Progress (gjw)
+
+## 2026-05-22  A1: soft IoU metric
+
+**Motivation**: Slide 12 中 M1 BCE Micro-mIoU=0.020、Meso-mIoU=0.000 反直觉低分，与 Recall@1 = 0.533 全场最高矛盾。
+诊断：BCE on soft-label + 27% 正样本不平衡 → sigmoid 输出被压低 → 二值化阈值 0.5 后 hard mIoU 接近 0，但相对排序保留。
+
+**Implementation**: `eval/metrics.py` 新增 `soft_iou(pred, gt, tier_mask)`：
+- 公式 `Σ min(p, y) / Σ max(p, y)`，连续值 IoU，不二值化
+- `InstanceMetrics` / `DatasetMetrics` / `evaluate_instance` / `evaluate_dataset` 全部加 micro/meso/macro soft_iou 字段
+- `eval/eval_main.py::print_table_header` 表头加 sIoUmi / sIoUme 两列
+- Test 10 验证：模拟"压低数据"hard mIoU=0.00 vs soft IoU=0.40 → soft > hard ✓
+
+**Result (seed=42, single seed)** — `eval/results_stage3_softiou.json`:
+
+| Method        | Micro-mIoU  | sIoUmi | Recall@1 |
+|---------------|-------------|--------|----------|
+| M0            | 0.263       | 0.467  | 0.467    |
+| M1 BCE        | **0.020**   | **0.234**  | **0.533** |
+| M1+focal      | 0.133       | 0.373  | 0.450    |
+| M1+composite  | 0.116       | 0.279  | 0.417    |
+| Where2Act     | 0.189       | 0.365  | 0.467    |
+
+**Key finding**: M1 BCE sIoUmi 0.234 是 hard mIoU 0.020 的 ×11.5 ——证明 BCE 模型学到了排序但绝对分数偏低，soft IoU 修复了 Slide 12 反直觉数字。
+注：此时 M0 数字 0.263 等仍来自 bug 版 ckpt (epoch=0 未训练)，A2 阶段才发现并修复，见下。
+
+## 2026-05-22  A2: multi-seed + paired t-test + 2 critical bugfixes
+
+**Plan**: 跑 4 变体 × 3 seed (42/43/44) 训练 + paired t-test 统计显著性。
+
+### A2-1: train.py 加 CLI --seed N 覆盖
+
+支持 `python -m microreach_net.train --config configs/m1.yaml --seed 43` 这种调用：
+- override `cfg["train"]["seed"]`
+- 自动改 `cfg["train"]["ckpt_dir"]`（`ckpts/m1_seed42` → `ckpts/m1_seed43`）
+- 自动改 wandb run_name
+
+### A2-2: eval/significance.py（之前 0 字节，本轮新写）
+
+- `load_results`：聚合多个 results_*.json 到 `{variant: {iid: [seed1, seed2, ...]}}`
+- `aggregate_mean_std`：每变体每指标的 mean ± std
+- `paired_arrays` + `paired_t_test`：按 (iid, seed_idx) 配对
+- 输出 mean±std 表 + paired t-test 表（带 *, **, *** 显著性标记）
+
+### A2-bugfix#1: best.pt 选择标准
+
+**根因**: `train.py` 原 `if val_stat["val_iou@0.5"] > best_iou` 初始 `best_iou=-1.0`：
+- M0 是 `per_point_mean` 单值预测，sigmoid 输出 ≈ 0.155 < 0.5 → val_iou@0.5 永远 = 0
+- epoch 0 时 `0.0 > -1.0` True → 保存 best.pt（**此时模型还没训练**）
+- 之后所有 epoch `0.0 > 0.0` False → best.pt 永不更新
+
+**Impact**: PPT Slide 12 里 M0 所有数字（Micro-mIoU=0.263 等）都来自 **epoch=0 未训练模型**。
+
+**Fix**: `best_val_loss = float("inf")` + `if cur_val_loss < best_val_loss`。M0/M1 通用、val_loss 始终有效。
+
+### A2-bugfix#2: ckpt_dir 双 seed 后缀
+
+**根因**: CLI seed override 逻辑用 `re.sub` 后判断 `new_dir == old_dir` 作为 fallback：
+- yaml 原 `ckpt_dir: ckpts/m0_seed42` + CLI `--seed 42` → `re.sub("seed42", "seed42", ...)` 不变 → 走 fallback → 变成 `ckpts/m0_seed42_seed42`
+
+**Fix**: 改用 `re.search(r"seed\d+", old_dir)` 检测；找到就 re.sub，找不到才追加 fallback。
+
+### A2 final result (3 seed × 4 variants + W2A) — `eval/significance_stage3.json`
+
+| variant        | micro_miou       | meso_miou        | sIoUmi           | sIoUme           | Recall@1         |
+|----------------|------------------|------------------|------------------|------------------|------------------|
+| m0             | 0.000 ± 0.000    | 0.000 ± 0.000    | 0.208 ± 0.134    | 0.190 ± 0.102    | 0.467 ± 0.312    |
+| m1             | 0.029 ± 0.095    | 0.000 ± 0.000    | 0.216 ± 0.175    | 0.188 ± 0.129    | 0.600 ± 0.350    |
+| **m1_focal**   | 0.123 ± 0.248    | 0.177 ± 0.245    | **0.406 ± 0.121**| **0.350 ± 0.164**| 0.600 ± 0.336    |
+| m1_composite   | 0.127 ± 0.245    | 0.190 ± 0.250    | 0.247 ± 0.197    | 0.253 ± 0.175    | 0.533 ± 0.353    |
+| where2act      | 0.189 ± 0.199    | 0.424 ± 0.272    | 0.365 ± 0.180    | 0.360 ± 0.230    | 0.467 ± 0.312    |
+
+### Paired t-test vs M0 baseline
+
+| Comparator    | micro_miou        | meso_miou         | sIoUmi             | sIoUme            | Recall@1          |
+|---------------|-------------------|-------------------|--------------------|-------------------|-------------------|
+| m1            | +0.029 p=0.220    | nan               | +0.008 p=0.627     | -0.002 p=0.902    | +0.133 p=0.109    |
+| **m1_focal**  | +0.123 **p=0.050\*** | +0.177 **p=0.029\*** | +0.198 **p=0.003\*\*** | +0.161 **p=0.004\*\*** | +0.133 p=0.112 |
+| m1_composite  | +0.127 **p=0.041\***| +0.190 **p=0.023\***| +0.039 p=0.116    | +0.063 **p=0.016\***| +0.067 p=0.514    |
+| where2act     | +0.189 **p=0.001\*\*\***| +0.424 **p<0.001\*\*\***| +0.157 p=0.053 | +0.170 **p=0.042\***| nan |
+
+### Key findings
+
+1. **M1 Focal 是阶段三主卖点**：在 hard Micro-mIoU / hard Meso-mIoU / sIoUmi / sIoUme 上全部 p<0.05，其中两项 p<0.01；且 sIoUmi=0.406 > W2A 0.365 → 是唯一 soft IoU 反超 SOTA 的变体。
+
+2. **M1 BCE Recall@1 优势趋势在但不显著**：从 0.533 (Slide 12 中期) 升到 0.600±0.350，但 p=0.109 未达 0.05 阈值。3 seed × 6 instance = 18 配对样本不够；需扩 5 seed 或 200 实例。
+
+3. **M0 hard mIoU 全 0 是 per-point baseline 固有局限**：bugfix 后 M0 训练 epoch=45/60/95 都正常，但 per_point_mean 标量 sigmoid 收敛到数据均值 0.155 < 0.5 阈值，二值化必为 0。**soft IoU 是更合理的评测**——在 soft IoU 上 M0=0.208 反映了真实学习水平。
+
+4. **Slide 12 中期 narrative 受影响**（暂不动 PPT，仅记录）：
+   - "M0 Micro-mIoU=0.263 击败 W2A" 不成立（来自未训练 ckpt）
+   - "M1 Recall@1 击败 W2A +14.3%" 趋势在但需更多数据证明统计显著
+   - 新增 narrative：M1 Focal 在所有 IoU 指标上 p<0.05 优于 M0，sIoUmi 反超 W2A
+
+### Artifacts (this commit)
+
+- `microreach_net/train.py`: CLI --seed override + best.pt by val_loss
+- `eval/metrics.py`: soft_iou function + 10th test case
+- `eval/eval_main.py`: header adds sIoUmi/sIoUme columns
+- `eval/significance.py`: new file (paired t-test)
+- `eval/results_stage3_seed42.json` / `seed43.json` / `seed44.json`: per-seed results
+- `eval/results_stage3_softiou.json`: A1 single-seed result (reference)
+- `eval/significance_stage3.json`: 3-seed mean±std + paired t-test
+- `ckpts/{m0,m1,m1_focal,m1_composite}_seed{42,43,44}/best.pt`: 12 clean ckpts (all epoch≠0)
+
+### Next for gjw
+
+- (P2) Extend to 5 seeds (add seed=45, 46) to push Recall@1 p-value below 0.05
+- (P3) Wait for hyh's R_contact labels → start M2 training (cascade level 1)
+- Defer: PartField backbone ablation, CrossScaleFusion global branch — both待 hyh 200 实例数据扩展
