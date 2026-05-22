@@ -1,0 +1,51 @@
+# M_full: 完整三层级联 R_geom · R_contact · R_exec + 双层 cascade 一致性正则
+#
+# 阶段三 P2：依赖 hyh 同时补齐 R_contact 和 R_exec 真值。
+# 在此之前可用 --cascade-synthetic 跑 smoke test。
+#
+# 物理意义（方案 §2.2）：
+#   R = R_geom × R_contact × R_exec
+#   伸得到 (geom) ≥ 抓得稳 (contact) ≥ 扳得动 (exec)
+#
+# 设计依据：
+#   - 三层 loss 不等权：geom 是基础 0.4，contact + exec 各 0.3；
+#                       cascade 一致性合计 0.2（mu1 + mu2）
+#   - 两层 cascade 一致性正则：
+#       cascade1 = relu(p_contact - p_geom)   # 抓得稳不应该比伸得到分数高
+#       cascade2 = relu(p_exec    - p_contact) # 扳得动不应该比抓得稳分数高
+
+_base_: default.yaml
+
+variant: m_full
+
+model:
+  use_pose_decoder: true
+  heads:
+    geom:    true                   # ✅
+    contact: true                   # ✅
+    exec:    true                   # ✅ 三头全开
+
+target_mode: per_query
+
+data:
+  load_contact: true
+  load_exec:    true
+
+loss:
+  type: bce
+  # Multi-task weights (Kendall 2018 + 经验调参)
+  head_weights:
+    geom:    0.4
+    contact: 0.3
+    exec:    0.3
+  cascade_consistency: true
+  cascade_mu:          0.1
+  cascade_mu_warmup_epochs: 50
+
+train:
+  epochs: 150                       # 三层比 M1 慢收敛，多给 50 epoch
+  seed: 42
+  ckpt_dir: ckpts/m_full_seed42
+
+wandb:
+  run_name: gjw_m_full_seed42

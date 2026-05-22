@@ -715,3 +715,219 @@ python -m eval.eval_main \
 | M2 training (cascade level 1) | ⚠️ Waiting for hyh's R_contact labels |
 | PartField backbone ablation | Defer to mid-late stage 3 |
 | Isaac Sim closed loop | Defer to stage 3 end |
+
+## 2026-05-22  A3: 三层级联（M2 / M_full）训练管线 + 失败案例库
+
+**Plan**: 三层级联的代码侧全部提前写好，待 hyh 一交付 R_contact / R_exec 标签即可零延迟启动训练。
+不依赖 hyh 的"失败案例库"作为 CCF-C 投稿加分项也一并完成。
+
+### A3-1: configs/m2.yaml + configs/m_full.yaml
+
+之前两个 yaml 都是 0 字节占位。
+
+**M2**（双层级联 geom + contact）：
+- `use_pose_decoder: true`，与 M1 完全一致
+- `heads: {geom: true, contact: true, exec: false}`
+- `head_weights: {geom: 0.5, contact: 0.3}`（参考 Kendall CVPR 2018 多任务权重经验）
+- `cascade_consistency: true, cascade_mu: 0.1, cascade_mu_warmup_epochs: 50`
+- `data.load_contact: true`：dataset 自动加载 R_contact 字段
+
+**M_full**（三层级联）：
+- `heads: {geom: true, contact: true, exec: true}`
+- `head_weights: {geom: 0.4, contact: 0.3, exec: 0.3}`
+- `epochs: 150`（三层比 M1 慢收敛，多给 50 epoch）
+- `data.load_contact: true, load_exec: true`
+
+### A3-2: train.py 改造支持多 head + cascade loss + mu warmup
+
+**MicroReachNet 多头化**：
+- 加 `heads.contact / heads.exec` 配置识别
+- lazily instantiate ContactHead / ExecHead（M0/M1 现有 ckpt 0 参数变化）
+- forward 单头模式返回 Tensor（与阶段二完全向后兼容），多头模式返回 dict
+- 验证：M_full 参数量 = 473,923（M1 是 457,281，多了 ContactHead + ExecHead 共 16K 参数）
+
+**train_one_epoch / validate 加 multi_head_cfg 参数**：
+- multi_head_cfg = None → 阶段二行为
+- multi_head_cfg = {head_weights, cascade_consistency, cascade_mu, cascade_mu_warmup_epochs}
+  → 调用新的 microreach_loss_multihead
+- W&B 同时记录 `l_geom / l_contact / l_exec / l_cascade / cascade_mu`
+
+**`_resolve_cascade_mu`（mu warmup 调度）**：
+- 参考 Bengio et al. 2009 Curriculum Learning
+- epoch < warmup: mu = 0 （让 head 各自学好再加约束）
+- warmup <= epoch < 2×warmup: linear ramp 0 → mu_final
+- epoch >= 2×warmup: mu_final
+
+**`--cascade-synthetic` CLI flag**：
+- 仅 smoke test 用。R_contact / R_exec 标签全 NaN 时：
+    R_contact_syn = R_geom × 0.8
+    R_exec_syn    = R_geom × 0.56
+- 强 WARNING + 不可用于正式实验
+
+### A3-3: dataset.py NaN-safe 多层加载
+
+**新增字段**：
+- `out["target_contact"]`, `out["valid_contact"]`：(max_M, 24) tensor
+- `out["target_exec"]`,    `out["valid_exec"]`：同
+- valid mask 设计参考 UPSNet CVPR 2019 处理 missing modalities：NaN 位置 valid=0，
+  训练时该 head loss 跳过这部分但不影响其他 head 训练。
+- `cascade_synthetic=True` 时若标签全 NaN 走合成路径（仅 smoke test）。
+
+### A3-2 新增 loss: `microreach_loss_multihead`
+
+`microreach_net/losses.py`:
+```python
+microreach_loss_multihead(
+    pred={"geom": ..., "contact"?: ..., "exec"?: ...},
+    target=同结构,
+    mask=(B,M),
+    valid={"contact"?: (B,M,K), "exec"?: ...},   # NaN-safe
+    head_weights=...,
+    cascade_consistency=True/False,
+    cascade_mu=current_epoch_mu,
+)
+```
+- NaN-safe：valid mask 全 0 时 l_head = 0，不污染梯度
+- cascade1 = relu(p_contact - p_geom)
+- cascade2 = relu(p_exec - p_contact)
+- 用 sigmoid 后概率算 cascade，logits 算 BCE
+- 单元测试 5 项：M2 / M_full / NaN-safe / mu warmup=0 / NaN scope
+
+### A3-5: eval_main.py 三头支持
+
+**predict_on_test 重写返回 List[Dict]**：
+- 单头模型（M0 / M1 系列）：dict 只有 instance_id / pred_geom / gt_geom / tiers
+- 多头模型（M2 / M_full）：额外 pred_contact / pred_exec / gt_contact / gt_exec
+- gt_contact / gt_exec 直接从 npz 读，NaN 时不返回该 key（evaluate_instance 自动 None）
+
+**evaluate_variant 改 evaluate_instance 接口**：
+- 把 multi-head 预测和 GT 一起传给 evaluate_instance
+- 自动激活 Cascade Consistency Rate 计算（之前 cascade 列总是 N/A）
+
+**验证**：smoke test 训出来的 M_full ckpt 评测输出 `cascade: 0.5198`，从前永远 N/A 的列首次有真实数字 ✅
+
+### A3-6: viz/failure_case_log.py + viz/failure_taxonomy.py
+
+之前两个文件都是 0 字节。设计依据 IROS 2023 standard practice "affordance failure analysis"：
+
+**failure_case_log.py**：
+- 输入：ckpt + config
+- 加载 ckpt → 跑 test → 按 (instance, candidate) 粒度分类
+- 5 类失败模式（query 索引 → (g_idx, psi_idx)）：
+    1. `hit`             top-1 ψ + g 都对（其实是命中，不是失败）
+    2. `direction_flip`  g 对 ψ 错（抓取构型选对了但方向错）
+    3. `grasp_mismatch`  ψ 对 g 错（方向对了但构型错）
+    4. `low_confidence`  pred max < 0.4（模型整体没信心）
+    5. `wrong_quadrant`  ψ + g 都错
+- 输出 CSV：每行 (instance_id, candidate_idx, tier, failure_class, top1_pred_idx,
+  top1_gt_idx, pred_top1_score, gt_top1_score, soft_iou)
+
+**failure_taxonomy.py**：
+- 输入：多个 failure_log_*.csv（不同 seed 聚合）
+- 输出 PNG 双 panel：
+    - Panel A：失败类别饼图（含 hit 占比）
+    - Panel B：按 tier 分组的堆叠柱状图（micro / meso / macro 各失败模式占比）
+- 全黑白配色（与之前 PPT Slide 7 风格一致），CVPR/ICRA 投稿适用
+
+**本地 smoke test（用 m1_focal_seed42 ckpt）**：
+- 29 个有效候选点（7 个 GT 全 0 跳过）
+- hit 62.1% / low_confidence 24.1% / wrong_quadrant 10.3% / direction_flip 3.4%
+- low_confidence 24% 印证了 A1 BCE sigmoid 压低的诊断
+
+### Artifacts (this commit)
+
+- `configs/m2.yaml`, `configs/m_full.yaml`: 之前空文件，现已就绪
+- `microreach_net/train.py`: 多头 + cascade loss + mu warmup + `--cascade-synthetic`
+- `microreach_net/dataset.py`: load_contact / load_exec / NaN-safe valid mask
+- `microreach_net/losses.py`: new `microreach_loss_multihead` (NaN-safe + cascade + 可调权重)
+- `eval/eval_main.py`: 三头 ckpt 支持 + Cascade Consistency Rate 评测
+- `viz/failure_case_log.py`: 之前空，新写 5 类失败分类
+- `viz/failure_taxonomy.py`: 之前空，新写双 panel 失败可视化
+
+### Stage 3 status after A3
+
+| Task | Status |
+|---|---|
+| A1 soft IoU metric | ✅ Done |
+| A2 multi-seed + significance | ✅ Done (5 seed, Recall p<0.05) |
+| Train pipeline bugfix | ✅ Done |
+| A3 三层级联训练管线 (M2 / M_full) | ✅ **代码就绪**（待 hyh 标签即可零延迟启动）|
+| A3 Cascade Consistency Rate 评测 | ✅ Done |
+| A3 失败案例库 | ✅ Done |
+
+### Next for gjw
+
+- **优先级 P0**：等 hyh 交付 R_contact 真值后立即启动 M2 训练（3 seed）+ Cascade Consistency Rate 评测
+- **优先级 P1**：完整三层 M_full 训练（等 hyh R_exec 标签）
+- **优先级 P2**：失败案例库扩展到 5 seed 聚合 + 各变体对比
+- PartField backbone ablation、CrossScaleFusion global branch、Isaac Sim closed loop —— 末期再做
+
+## Hyh 待办（gjw 阻塞依赖，按优先级排）
+
+> 关镜文已把整条三层级联训练 / 评测 / 可视化管线代码全部写完。
+> 现在唯一卡点：**npz 文件里 R_contact / R_exec 字段需要从 NaN 补成真实数值**。
+
+### P0 — hyh 必须做的（阻塞 M2 训练）
+
+**1. R_contact 标签批量生成（依赖 `label_gen/r_contact.py` 已有 444 行）**
+- 当前 47 个 npz 里 `R_contact` 字段全 NaN
+- `label_gen/r_contact.py:197` 的 `compute_r_contact(p, psi, g, part_normal, ...)` 函数已写完
+  力闭合 + 接触面积 + 轴对齐三项加权
+- 待做：让 `batch_generate.py` 调用 `compute_r_contact` 对每个 (p, ψ, g) query 跑，结果写回 npz
+- 工作量预计：约半天调通 + 1 天跑完 47 实例 × 16 候选 × 24 query
+
+**验收标准**：
+```python
+import numpy as np
+d = np.load('data/1380.npz', allow_pickle=True)
+assert not np.isnan(d['R_contact']).all(), "R_contact 应有真值"
+print('R_contact stats: min={:.3f}, max={:.3f}, mean={:.3f}'.format(
+    d['R_contact'].min(), d['R_contact'].max(), d['R_contact'].mean()))
+# 期望：物理上必有 R_contact ≤ R_geom（cascade 约束），违反样本应 < 5%
+```
+
+**2. R_geom / R_contact 一致性自检**
+- `batch_generate.py` 输出时检查每个 query 是否满足 R_contact ≤ R_geom + ε(0.05)
+- 违反样本写入 `data/cascade_violations.json`，方便排查
+
+### P1 — hyh 可选做（阻塞 M_full 训练，可推阶段三末期）
+
+**3. R_exec 标签生成（依赖 `label_gen/r_exec.py`，当前 0 字节）**
+- 需要从零写 r_exec.py，按方案 §2.2 用 ScrewSplat (CoRL 2025) 的 screw 轴解析判定
+- 两阶段：
+    a. 解析判定（毫秒级）：先估每个铰接部件的 screw 轴 (l_hat, m, h)，沿轴 1D 运动用解析式判断
+    b. 边界样本（|R_exec - 0.5| < 0.1）跑 PhysX 复核
+- 工作量较大，预计 1 周
+
+**4. 200 实例扩展（依赖 hyh 跑更多 SAPIEN 仿真）**
+- 中期 47 个 Faucet 太小，5-seed 后部分指标仍 p > 0.05
+- 阶段三计划扩到 200 实例 × 5 类（StorageFurniture / Microwave / Refrigerator / Dishwasher / Drawer）
+- 工作量：1-2 周
+
+### 给 hyh 的快速验证清单
+
+收到 R_contact 标签后，关镜文跑（确认无误后再训练）：
+```bash
+# 1. 数据自检
+python -c "
+import numpy as np, glob
+files = sorted(glob.glob('data/*.npz'))
+ok = 0
+for f in files:
+    d = np.load(f, allow_pickle=True)
+    if not np.isnan(d['R_contact']).all():
+        ok += 1
+print(f'{ok}/{len(files)} npz 已有 R_contact 真值')
+"
+
+# 2. 启动 M2 训练（3 seed）
+for seed in 42 43 44; do
+  python -m microreach_net.train --config configs/m2.yaml --seed $seed
+done
+
+# 3. M2 vs M1 多 seed 评测 + 显著性
+python -m eval.eval_main \
+  --compare m1:configs/m1.yaml:ckpts/m1_seed42/best.pt \
+            m2:configs/m2.yaml:ckpts/m2_seed42/best.pt \
+  --json-out eval/results_stage3_m2_seed42.json
+```

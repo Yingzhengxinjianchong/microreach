@@ -203,6 +203,89 @@ def microreach_loss_geom_only(
         )
 
 
+def microreach_loss_multihead(
+    pred: Dict[str, torch.Tensor],          # {"geom": (B,M,K), "contact"?: ..., "exec"?: ...}
+    target: Dict[str, torch.Tensor],         # 同结构（每个层独立标签）
+    mask: torch.Tensor,                      # (B, M) 候选点 padding mask
+    valid: Optional[Dict[str, torch.Tensor]] = None,  # {"contact"?: (B,M,K), "exec"?: ...} NaN-safe mask
+    head_weights: Optional[Dict[str, float]] = None,
+    cascade_consistency: bool = False,
+    cascade_mu: float = 0.0,                 # 调用方传"已 warmup 后的 mu"
+) -> Dict[str, torch.Tensor]:
+    """
+    阶段三多 head Loss（NaN-safe + cascade 一致性 + 可调权重）。
+
+    NaN-safe：若某 head（如 contact）的 valid mask 全 0（hyh 还没补真值），
+    该 head loss 直接给 0 但不影响其他 head 训练。
+    cascade_mu：调用方负责 warmup 调度（前 50 epoch 给 0，之后线性 ramp）。
+
+    Args:
+        pred:    {"geom": ...} 必须；"contact"/"exec" 可选
+        target:  与 pred 同 key
+        mask:    (B, M) 1=valid candidate
+        valid:   {head_name: (B, M, K)} 1=valid label position（NaN 处为 0）。
+                 如不传则全部 valid。
+        head_weights: 默认 0.5 (geom) + 0.3 (contact) + 0.3 (exec) - 多于 1 没关系
+        cascade_consistency: 启用 cascade1 = relu(p_contact - p_geom)
+                                + cascade2 = relu(p_exec - p_contact)
+        cascade_mu: 当前 epoch 的 mu 值
+    """
+    if head_weights is None:
+        head_weights = {"geom": 0.5, "contact": 0.3, "exec": 0.3}
+    if valid is None:
+        valid = {}
+
+    # candidate-level mask broadcast 到 (B, M, K)
+    mask_e = mask.unsqueeze(-1)                                     # (B, M, 1)
+
+    out: Dict[str, torch.Tensor] = {}
+    total = torch.zeros((), device=mask.device, dtype=torch.float32)
+    p_per_head: Dict[str, torch.Tensor] = {}
+
+    for head_name in ["geom", "contact", "exec"]:
+        if head_name not in pred:
+            continue
+        logits = pred[head_name]
+        tgt    = target[head_name]
+        w      = head_weights.get(head_name, 0.0)
+
+        # 该 head 的逐位置 valid（默认全 valid）
+        v = valid.get(head_name)
+        if v is None:
+            head_valid = mask_e.expand_as(logits)
+        else:
+            head_valid = v * mask_e                                 # (B, M, K)，相乘等价 AND
+
+        # 完全没有 valid 标签（hyh 没补）→ loss = 0，不污染梯度
+        if float(head_valid.sum().item()) < 0.5:
+            l = torch.zeros((), device=mask.device, dtype=torch.float32)
+        else:
+            l = masked_bce_with_logits(logits, tgt, head_valid)
+
+        out[f"l_{head_name}"] = l.detach()
+        total = total + w * l
+        p_per_head[head_name] = torch.sigmoid(logits)
+
+    # Cascade 一致性正则
+    if cascade_consistency and cascade_mu > 0.0:
+        l_cascade = torch.zeros((), device=mask.device, dtype=torch.float32)
+        # cascade1: p_contact <= p_geom
+        if "geom" in p_per_head and "contact" in p_per_head:
+            diff = F.relu(p_per_head["contact"] - p_per_head["geom"])
+            l_cascade = l_cascade + (diff * mask_e).sum() / (mask_e.sum() * diff.size(-1) + 1e-8)
+        # cascade2: p_exec <= p_contact
+        if "contact" in p_per_head and "exec" in p_per_head:
+            diff = F.relu(p_per_head["exec"] - p_per_head["contact"])
+            l_cascade = l_cascade + (diff * mask_e).sum() / (mask_e.sum() * diff.size(-1) + 1e-8)
+        total = total + cascade_mu * l_cascade
+        out["l_cascade"] = l_cascade.detach()
+    else:
+        out["l_cascade"] = torch.zeros((), device=mask.device)
+
+    out["loss"] = total
+    return out
+
+
 def microreach_loss_full(
     pred_geom: torch.Tensor,
     pred_contact: torch.Tensor,
@@ -281,4 +364,64 @@ if __name__ == "__main__":
     out_m0 = microreach_loss_geom_only(pred_m0, target_m0, mask)
     print(f"  M0 mode: l_geom = {out_m0['loss'].item():.4f}")
 
+    # ─── 阶段三：multi-head loss 测试 ───
+    print("\n=== Multi-head loss smoke test ===")
+
+    # M2 (geom + contact)，contact 有 valid mask
+    pred_m2 = {
+        "geom":    torch.randn(B, M, K),
+        "contact": torch.randn(B, M, K),
+    }
+    target_m2 = {
+        "geom":    torch.rand(B, M, K),
+        "contact": torch.rand(B, M, K),
+    }
+    valid_m2 = {
+        "contact": torch.ones(B, M, K),
+    }
+    out_m2 = microreach_loss_multihead(
+        pred_m2, target_m2, mask, valid=valid_m2,
+        head_weights={"geom": 0.5, "contact": 0.3},
+        cascade_consistency=True, cascade_mu=0.1,
+    )
+    print(f"  M2: total={out_m2['loss'].item():.4f}  "
+          f"l_geom={out_m2['l_geom'].item():.4f}  "
+          f"l_contact={out_m2['l_contact'].item():.4f}  "
+          f"l_cascade={out_m2['l_cascade'].item():.4f}")
+    assert out_m2["loss"].item() > 0
+
+    # M_full (geom + contact + exec)
+    pred_full = {**pred_m2, "exec": torch.randn(B, M, K)}
+    target_full = {**target_m2, "exec": torch.rand(B, M, K)}
+    valid_full = {**valid_m2, "exec": torch.ones(B, M, K)}
+    out_full = microreach_loss_multihead(
+        pred_full, target_full, mask, valid=valid_full,
+        head_weights={"geom": 0.4, "contact": 0.3, "exec": 0.3},
+        cascade_consistency=True, cascade_mu=0.1,
+    )
+    print(f"  M_full: total={out_full['loss'].item():.4f}  "
+          f"l_geom={out_full['l_geom'].item():.4f}  "
+          f"l_contact={out_full['l_contact'].item():.4f}  "
+          f"l_exec={out_full['l_exec'].item():.4f}  "
+          f"l_cascade={out_full['l_cascade'].item():.4f}")
+    assert out_full["loss"].item() > 0
+
+    # NaN-safe：contact head valid 全 0（hyh 没补标签）→ l_contact = 0
+    valid_no_contact = {"contact": torch.zeros(B, M, K)}
+    out_nan = microreach_loss_multihead(
+        pred_m2, target_m2, mask, valid=valid_no_contact,
+        head_weights={"geom": 0.5, "contact": 0.3},
+    )
+    assert out_nan["l_contact"].item() < 1e-6, "valid 全 0 时 l_contact 必须 = 0"
+    print(f"  NaN-safe (contact valid=全0): l_contact={out_nan['l_contact'].item():.6f} (期望 0) ✓")
+
+    # mu warmup = 0 时 cascade 项不参与
+    out_no_cascade = microreach_loss_multihead(
+        pred_m2, target_m2, mask, valid=valid_m2,
+        cascade_consistency=True, cascade_mu=0.0,
+    )
+    assert out_no_cascade["l_cascade"].item() < 1e-6
+    print(f"  mu=0 (warmup): l_cascade={out_no_cascade['l_cascade'].item():.6f} (期望 0) ✓")
+
+    print("[OK] Multi-head loss smoke test passed")
     print("[OK] Losses smoke test passed")
