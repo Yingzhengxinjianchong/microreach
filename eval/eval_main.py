@@ -287,10 +287,11 @@ def get_test_ids_from_config(config_path: str) -> List[str]:
 
 def print_table_header() -> None:
     print()
-    print("  " + "-" * 116)
+    print("  " + "-" * 140)
     print(f"  {'method':20s} | {'micro':6s} | {'meso':6s} | {'macro':6s} | "
+          f"{'sIoUmi':6s} | {'sIoUme':6s} | "
           f"{'rec@1':6s} | {'rec@5':6s} | {'cascade':6s} | {'execSucc':8s}")
-    print("  " + "-" * 116)
+    print("  " + "-" * 140)
 
 
 def main():

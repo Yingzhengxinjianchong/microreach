@@ -158,6 +158,52 @@ def meso_miou(
     return float(intersect / (union + eps))
 
 
+def soft_iou(
+    pred:        np.ndarray,
+    gt:          np.ndarray,
+    tier_mask:   Optional[np.ndarray] = None,
+    eps:         float = 1e-8,
+) -> float:
+    """
+    Per-query Soft IoU (Jaccard)：连续值 IoU，不二值化。
+
+    阶段三新增。修复中期 BCE 模型 sigmoid 被压低导致二值化 Micro-mIoU≈0 的问题。
+    soft IoU 直接在 [0,1] 连续值上算交并，相对排序学对了就有合理分数。
+
+    公式：
+        soft_IoU = Σ min(p, y) / Σ max(p, y)
+
+    Args:
+        pred:      shape (M, K)，连续预测 ∈ [0,1]
+        gt:        shape (M, K)，标签 ∈ [0,1]
+        tier_mask: shape (M, K) bool；None 表示所有位置都算
+        eps:       防零除
+
+    Returns:
+        float ∈ [0, 1]
+    """
+    if pred.shape != gt.shape:
+        raise ValueError(f"pred.shape={pred.shape} ≠ gt.shape={gt.shape}")
+
+    if tier_mask is None:
+        tier_mask = np.ones_like(pred, dtype=bool)
+    elif tier_mask.shape != pred.shape:
+        raise ValueError(
+            f"tier_mask.shape={tier_mask.shape} ≠ pred.shape={pred.shape}"
+        )
+
+    if not tier_mask.any():
+        return float("nan")
+
+    p = np.where(tier_mask, pred, 0.0)
+    g = np.where(tier_mask, gt,   0.0)
+
+    inter = np.minimum(p, g).sum()
+    union = np.maximum(p, g).sum()
+
+    return float(inter / (union + eps))
+
+
 def pose_aware_recall_at_k(
     pred:      np.ndarray,
     gt:        np.ndarray,
@@ -278,6 +324,10 @@ class InstanceMetrics:
     pose_aware_recall_at_5:   Optional[float]   # 阶段三
     cascade_consistency_rate: Optional[float]   # 阶段三
     sim_exec_success:         Optional[float]   # 阶段三
+    # 阶段三新增：soft IoU（不二值化，直接连续 IoU），修复 BCE sigmoid 压低问题
+    micro_soft_iou:           Optional[float] = None
+    meso_soft_iou:            Optional[float] = None
+    macro_soft_iou:           Optional[float] = None
 
     def to_dict(self) -> dict:
         return {k: v for k, v in self.__dict__.items()}
@@ -344,6 +394,11 @@ def evaluate_instance(
 
     ses = sim_exec_success(isaac_results)
 
+    # 阶段三新增：soft IoU（修复 BCE 压低导致 Micro-mIoU≈0 的反直觉现象）
+    s_micro = soft_iou(pred_geom, gt_geom, micro_mask) if micro_mask.any() else None
+    s_meso  = soft_iou(pred_geom, gt_geom, meso_mask)  if meso_mask.any()  else None
+    s_macro = soft_iou(pred_geom, gt_geom, macro_mask) if macro_mask.any() else None
+
     return InstanceMetrics(
         instance_id              = instance_id,
         micro_miou               = m_micro,
@@ -353,6 +408,9 @@ def evaluate_instance(
         pose_aware_recall_at_5   = recall5,
         cascade_consistency_rate = ccr,
         sim_exec_success         = ses,
+        micro_soft_iou           = s_micro,
+        meso_soft_iou            = s_meso,
+        macro_soft_iou           = s_macro,
     )
 
 
@@ -371,6 +429,10 @@ class DatasetMetrics:
     cascade_consistency_rate: Optional[float]
     sim_exec_success:         Optional[float]
     n_instances:              int
+    # 阶段三新增
+    micro_soft_iou:           Optional[float] = None
+    meso_soft_iou:            Optional[float] = None
+    macro_soft_iou:           Optional[float] = None
 
     def to_dict(self) -> dict:
         return {k: (round(v, 4) if isinstance(v, float) else v)
@@ -382,6 +444,8 @@ class DatasetMetrics:
             return f"{v:.4f}" if isinstance(v, float) else "  N/A "
         print(f"  {method_name:20s} | {fmt(self.micro_miou)} | "
               f"{fmt(self.meso_miou)} | {fmt(self.macro_miou)} | "
+              f"{fmt(self.micro_soft_iou)} | "
+              f"{fmt(self.meso_soft_iou)} | "
               f"{fmt(self.pose_aware_recall_at_1)} | "
               f"{fmt(self.pose_aware_recall_at_5)} | "
               f"{fmt(self.cascade_consistency_rate)} | "
@@ -414,6 +478,9 @@ def evaluate_dataset(
         cascade_consistency_rate = _mean("cascade_consistency_rate"),
         sim_exec_success         = _mean("sim_exec_success"),
         n_instances              = len(instance_metrics_list),
+        micro_soft_iou           = _mean("micro_soft_iou"),
+        meso_soft_iou            = _mean("meso_soft_iou"),
+        macro_soft_iou           = _mean("macro_soft_iou"),
     )
 
 
@@ -639,14 +706,64 @@ def _run_tests() -> None:
     print(f"  cascade_rate={im3.cascade_consistency_rate:.4f} (期望 1.0) ✓")
     print(f"  sim_exec={im3.sim_exec_success:.4f} (期望 0.8) ✓")
 
+    # ─── 测试 10：soft_iou（阶段三新增）───
+    print("\n[Test 10] soft_iou (阶段三新增)")
+
+    pred_full = np.ones((M, K), dtype=np.float32)
+    gt_full   = np.ones((M, K), dtype=np.float32)
+    val = soft_iou(pred_full, gt_full)
+    assert abs(val - 1.0) < 1e-6, f"完美预测 soft_iou 应为 1.0, 得 {val}"
+    print(f"  完美预测 soft_iou: {val:.4f} (期望 1.0) ✓")
+
+    val = soft_iou(np.zeros_like(gt_full), gt_full)
+    assert val < 1e-6, f"pred 全零应为 0, 得 {val}"
+    print(f"  pred 全零: {val:.8f} (期望≈0) ✓")
+
+    # 全零 pred + 全零 gt：union=0 → 0
+    val = soft_iou(np.zeros((M, K)), np.zeros((M, K)))
+    assert val < 1e-6
+    print(f"  pred+gt 全零: {val:.8f} (期望≈0) ✓")
+
+    # 关键性质：pred=0.4, gt=0.8 → soft_iou = 0.4/0.8 = 0.5
+    pred_half = np.full((M, K), 0.4, dtype=np.float32)
+    gt_eight  = np.full((M, K), 0.8, dtype=np.float32)
+    val = soft_iou(pred_half, gt_eight)
+    assert abs(val - 0.5) < 1e-4, f"pred=0.4/gt=0.8 应为 0.5, 得 {val}"
+    print(f"  pred=0.4, gt=0.8 → {val:.4f} (期望 0.5) ✓")
+
+    # 关键性质：BCE 压低问题的合理修复
+    #   假设模型学到了 GT 的相对排序，但整体 sigmoid 被压低
+    #   旧 hard IoU @ 0.5 阈值：pred 全 < 0.5 → IoU=0
+    #   新 soft IoU：还能反映相对比例
+    rng2 = np.random.default_rng(seed=42)
+    gt_imbalanced = (rng2.random((M, K)) < 0.27).astype(np.float32)  # 27% 正样本
+    pred_compressed = gt_imbalanced * 0.4 + rng2.random((M, K)) * 0.05  # 学对了排序但压低
+    hard = micro_miou(pred_compressed, gt_imbalanced, np.ones((M, K), dtype=bool))
+    soft = soft_iou(pred_compressed, gt_imbalanced)
+    print(f"  压低数据 hard mIoU={hard:.4f} vs soft IoU={soft:.4f}")
+    assert soft > hard, f"soft IoU 应高于压低后的 hard mIoU"
+    print(f"  soft > hard ✓ (验证修复 BCE 压低问题)")
+
+    # mask 选择性
+    mask_partial = np.zeros((M, K), dtype=bool)
+    mask_partial[:, :12] = True
+    val = soft_iou(pred_full, gt_full, mask_partial)
+    assert abs(val - 1.0) < 1e-6
+    print(f"  mask 半选 + 完美预测: {val:.4f} (期望 1.0) ✓")
+
+    # 全 False mask → nan
+    val = soft_iou(pred_full, gt_full, np.zeros((M, K), dtype=bool))
+    assert np.isnan(val)
+    print(f"  mask 全 False → nan ✓")
+
     print("\n" + "=" * 65)
-    print("全部 9 项测试通过 ✓")
+    print("全部 10 项测试通过 ✓")
     print("=" * 65)
 
     # 打印示例对比表 header
-    print("\n示例对比表格式（eval_main.py 输出）：")
-    print(f"  {'Method':20s} | micro  | meso  | macro | R@1   | R@5   | Casc  | ExecS")
-    print("  " + "─" * 75)
+    print("\n示例对比表格式（eval_main.py 输出，含 soft IoU 阶段三新增列）：")
+    print(f"  {'Method':20s} | micro  | meso  | macro | sIoUmi | sIoUme | R@1   | R@5   | Casc  | ExecS")
+    print("  " + "─" * 100)
     dm.print_table_row("M1 (示例)")
 
 
