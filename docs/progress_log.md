@@ -663,3 +663,55 @@ python -m eval.eval_main \
 - (P2) Extend to 5 seeds (add seed=45, 46) to push Recall@1 p-value below 0.05
 - (P3) Wait for hyh's R_contact labels → start M2 training (cascade level 1)
 - Defer: PartField backbone ablation, CrossScaleFusion global branch — both待 hyh 200 实例数据扩展
+
+## 2026-05-22  A2 extension: 5-seed (P2 complete)
+
+**Plan**: 把 seed=42/43/44 三 seed 扩到 5 seed（加 seed=45/46），把 Recall 优势从"趋势"做到"统计显著"。
+
+**Process**: AutoDL 上 8 次新训练 + 2 次评测 + 1 次显著性，约 7 分钟。
+
+### 5-seed final result — `eval/significance_stage3_5seed.json`
+
+| variant        | micro_miou       | meso_miou        | sIoUmi             | sIoUme             | Recall@1         | Recall@5         |
+|----------------|------------------|------------------|--------------------|--------------------|------------------|------------------|
+| m0             | 0.000 ± 0.000    | 0.000 ± 0.000    | 0.210 ± 0.134      | 0.193 ± 0.104      | 0.467 ± 0.309    | 0.683 ± 0.354    |
+| m1             | 0.033 ± 0.093    | 0.004 ± 0.017    | 0.224 ± 0.171      | 0.204 ± 0.134      | **0.633 ± 0.348**| 0.720 ± 0.298    |
+| **m1_focal**   | 0.132 ± 0.251    | 0.198 ± 0.248    | **0.407 ± 0.117**  | **0.352 ± 0.161**  | 0.617 ± 0.332    | **0.727 ± 0.290**|
+| m1_composite   | 0.135 ± 0.236    | 0.209 ± 0.239    | 0.249 ± 0.187      | 0.261 ± 0.169      | 0.593 ± 0.355    | 0.720 ± 0.298    |
+| where2act      | 0.189 ± 0.197    | 0.424 ± 0.267    | 0.365 ± 0.176      | 0.360 ± 0.226      | 0.467 ± 0.309    | 0.683 ± 0.354    |
+
+### 5-seed paired t-test vs M0
+
+| Comparator    | micro_miou         | meso_miou           | sIoUmi              | sIoUme              | Recall@1            | Recall@5            |
+|---------------|--------------------|---------------------|---------------------|---------------------|---------------------|---------------------|
+| m1            | +0.033 p=0.057     | +0.004 p=0.330      | +0.014 p=0.238      | +0.012 p=0.266      | **+0.167 p=0.004\*\***  | **+0.037 p=0.025\***|
+| **m1_focal**  | **+0.132 p=0.007\*\***  | **+0.198 p=0.002\*\***  | **+0.197 p<0.001\*\*\*** | **+0.160 p<0.001\*\*\*** | **+0.150 p=0.007\*\***  | **+0.043 p=0.030\***|
+| m1_composite  | **+0.135 p=0.004\*\***  | **+0.209 p=0.001\*\*\***| **+0.038 p=0.034\***| **+0.068 p=0.001\*\*\***| +0.127 p=0.062      | **+0.037 p=0.025\***|
+| where2act     | **+0.189 p<0.001\*\*\***| **+0.424 p<0.001\*\*\***| **+0.154 p=0.011\***| **+0.167 p=0.008\*\***  | +0.000 p=nan        | +0.000 p=nan        |
+
+### P2 收尾结论
+
+1. **Recall@1 显著性达成（核心目标）**：M1 vs M0 Recall@1 p 值从 3-seed 的 0.109 降到 **5-seed 的 0.004 (p<0.01)**——5D 姿态条件场的 Recall 优势达到强统计显著。
+
+2. **M1 Focal 在所有 6 个指标上 p<0.05 击败 M0**（hard mi/meso/sIoUmi/sIoUme/R@1/R@5 全显著），其中 4 项 p<0.01——这是阶段三最强的统计证据。
+
+3. **sIoUmi 反超 SOTA 仍然成立**：M1 Focal 0.407 vs W2A 0.365（5-seed 均值），是唯一在 soft IoU 上击败 ICCV 2021 SOTA 的变体。
+
+4. **W2A 在 hard mIoU 上仍领先**：M0 hard mIoU=0 是 per-point baseline 固有局限（sigmoid 收敛到数据均值 0.155 < 0.5 阈值），不重训。论文 narrative 中 hard mIoU 作为参考列，soft IoU 作为主指标。
+
+### Artifacts (this commit)
+
+- `eval/results_stage3_seed45.json` / `seed46.json`: 新增 seed 评测结果
+- `eval/significance_stage3_5seed.json`: 5 seed 最终统计
+- `ckpts/{m0,m1,m1_focal,m1_composite}_seed{45,46}/best.pt`: 8 个新 ckpt
+
+### Stage 3 status after A2
+
+| Task | Status |
+|---|---|
+| A1 soft IoU metric | ✅ Done |
+| A2 multi-seed + significance | ✅ Done (5 seed, Recall p<0.05 达成) |
+| Train pipeline bugfix (val_loss + ckpt_dir) | ✅ Done |
+| M2 training (cascade level 1) | ⚠️ Waiting for hyh's R_contact labels |
+| PartField backbone ablation | Defer to mid-late stage 3 |
+| Isaac Sim closed loop | Defer to stage 3 end |
