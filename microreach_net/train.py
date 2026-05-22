@@ -395,7 +395,10 @@ def main():
         print(f"Loss: type={loss_type}")
 
     # 训练循环
-    best_iou = -1.0
+    # 阶段三修复：原先按 val_iou@0.5 选 best.pt 在 M0 模式（per_point_mean）下永远 = 0
+    # （sigmoid 输出标量几乎不可能 > 0.5 阈值），导致 M0 的 best.pt 卡在 epoch=0。
+    # 改为按 val_loss 越低越好（与 M0/M1 都兼容）。
+    best_val_loss = float("inf")
     for epoch in range(n_epochs):
         train_stat = train_one_epoch(
             model, train_loader, optimizer, device, scheduler,
@@ -416,14 +419,17 @@ def main():
             if use_wandb:
                 import wandb
                 wandb.log({**val_stat, "epoch": epoch})
-            if val_stat["val_iou@0.5"] > best_iou:
-                best_iou = val_stat["val_iou@0.5"]
+            cur_val_loss = val_stat["val_loss"]
+            if cur_val_loss < best_val_loss:
+                best_val_loss = cur_val_loss
                 torch.save(
                     {"model": model.state_dict(), "cfg": cfg, "epoch": epoch,
                      "val_stat": val_stat},
                     ckpt_dir / "best.pt",
                 )
-                print(f"  [ckpt] best.pt updated (iou={best_iou:.4f})")
+                print(f"  [ckpt] best.pt updated (val_loss={best_val_loss:.4f}, "
+                      f"val_iou={val_stat['val_iou@0.5']:.4f}, "
+                      f"val_recall@1={val_stat['val_recall@1']})")
 
         # 定期 ckpt
         if (epoch + 1) % cfg["train"]["ckpt_every_epoch"] == 0:
@@ -432,7 +438,7 @@ def main():
                 ckpt_dir / f"epoch_{epoch}.pt",
             )
 
-    print(f"\n=== Done. best_iou={best_iou:.4f} ===")
+    print(f"\n=== Done. best_val_loss={best_val_loss:.4f} ===")
     print(f"Checkpoints in: {ckpt_dir}")
 
 
