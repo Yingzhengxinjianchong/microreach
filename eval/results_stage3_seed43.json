@@ -9,8 +9,8 @@
       "cascade_consistency_rate": null,
       "sim_exec_success": null,
       "n_instances": 6,
-      "micro_soft_iou": 0.414,
-      "meso_soft_iou": 0.3458,
+      "micro_soft_iou": 0.2067,
+      "meso_soft_iou": 0.1939,
       "macro_soft_iou": null
     },
     "instances": [
@@ -23,7 +23,7 @@
         "pose_aware_recall_at_5": 0.6,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.3612087585772269,
+        "micro_soft_iou": 0.3823926764438286,
         "meso_soft_iou": null,
         "macro_soft_iou": null
       },
@@ -37,7 +37,7 @@
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.42933049796126793,
+        "meso_soft_iou": 0.33894618363811724,
         "macro_soft_iou": null
       },
       {
@@ -49,8 +49,8 @@
         "pose_aware_recall_at_5": 0.1,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.21505156979174153,
-        "meso_soft_iou": 0.10432815745394969,
+        "micro_soft_iou": 0.2542502348518517,
+        "meso_soft_iou": 0.13071584092035798,
         "macro_soft_iou": null
       },
       {
@@ -62,8 +62,8 @@
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.691938802246432,
-        "meso_soft_iou": 0.6199749007723385,
+        "micro_soft_iou": 0.10561764559188329,
+        "meso_soft_iou": 0.08250582161378492,
         "macro_soft_iou": null
       },
       {
@@ -75,7 +75,7 @@
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.38779285922558704,
+        "micro_soft_iou": 0.08446206787374605,
         "meso_soft_iou": null,
         "macro_soft_iou": null
       },
@@ -89,14 +89,14 @@
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.22943073983392898,
+        "meso_soft_iou": 0.22330216104303893,
         "macro_soft_iou": null
       }
     ]
   },
   "m1": {
     "dataset": {
-      "micro_miou": 0.0804,
+      "micro_miou": 0.0654,
       "meso_miou": 0.0,
       "macro_miou": null,
       "pose_aware_recall_at_1": 0.6833,
@@ -104,21 +104,21 @@
       "cascade_consistency_rate": null,
       "sim_exec_success": null,
       "n_instances": 6,
-      "micro_soft_iou": 0.247,
-      "meso_soft_iou": 0.231,
+      "micro_soft_iou": 0.2161,
+      "meso_soft_iou": 0.1712,
       "macro_soft_iou": null
     },
     "instances": [
       {
         "instance_id": "1667",
-        "micro_miou": 0.4821428570567602,
+        "micro_miou": 0.39215686266820454,
         "meso_miou": null,
         "macro_miou": null,
         "pose_aware_recall_at_1": 0.6,
         "pose_aware_recall_at_5": 0.6,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.4944698803976343,
+        "micro_soft_iou": 0.523948625807606,
         "meso_soft_iou": null,
         "macro_soft_iou": null
       },
@@ -132,7 +132,7 @@
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.4095371646322579,
+        "meso_soft_iou": 0.36535523395932484,
         "macro_soft_iou": null
       },
       {
@@ -144,8 +144,8 @@
         "pose_aware_recall_at_5": 0.3,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.3333818353848166,
-        "meso_soft_iou": 0.17910609868630306,
+        "micro_soft_iou": 0.2196491231888028,
+        "meso_soft_iou": 0.13506833031646379,
         "macro_soft_iou": null
       },
       {
@@ -157,8 +157,8 @@
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.07838381612858708,
-        "meso_soft_iou": 0.05561966235895427,
+        "micro_soft_iou": 0.07345532478840985,
+        "meso_soft_iou": 0.04816650531735134,
         "macro_soft_iou": null
       },
       {
@@ -170,7 +170,7 @@
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.08181082131396687,
+        "micro_soft_iou": 0.0472755246933087,
         "meso_soft_iou": null,
         "macro_soft_iou": null
       },
@@ -184,7 +184,7 @@
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.279669150951886,
+        "meso_soft_iou": 0.13630770272522794,
         "macro_soft_iou": null
       }
     ]
@@ -192,7 +192,7 @@
   "m1_focal": {
     "dataset": {
       "micro_miou": 0.1408,
-      "meso_miou": 0.2086,
+      "meso_miou": 0.2033,
       "macro_miou": null,
       "pose_aware_recall_at_1": 0.6833,
       "pose_aware_recall_at_5": 0.7167,
@@ -220,14 +220,14 @@
       {
         "instance_id": "1380",
         "micro_miou": 0.0,
-        "meso_miou": 0.6363636362809918,
+        "meso_miou": 0.61538461530572,
         "macro_miou": null,
         "pose_aware_recall_at_1": 1.0,
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.5111244464132754,
+        "meso_soft_iou": 0.5112935768675901,
         "macro_soft_iou": null
       },
       {
@@ -286,56 +286,56 @@
   },
   "m1_composite": {
     "dataset": {
-      "micro_miou": 0.1599,
-      "meso_miou": 0.2429,
+      "micro_miou": 0.1384,
+      "meso_miou": 0.2061,
       "macro_miou": null,
       "pose_aware_recall_at_1": 0.5,
       "pose_aware_recall_at_5": 0.7167,
       "cascade_consistency_rate": null,
       "sim_exec_success": null,
       "n_instances": 6,
-      "micro_soft_iou": 0.2451,
-      "meso_soft_iou": 0.2883,
+      "micro_soft_iou": 0.2345,
+      "meso_soft_iou": 0.2613,
       "macro_soft_iou": null
     },
     "instances": [
       {
         "instance_id": "1667",
-        "micro_miou": 0.5844155843396863,
+        "micro_miou": 0.5890410958097204,
         "meso_miou": null,
         "macro_miou": null,
         "pose_aware_recall_at_1": 0.4,
         "pose_aware_recall_at_5": 0.6,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.4272651103935054,
+        "micro_soft_iou": 0.44545875075012525,
         "meso_soft_iou": null,
         "macro_soft_iou": null
       },
       {
         "instance_id": "1380",
         "micro_miou": 0.0,
-        "meso_miou": 0.6027397259448303,
+        "meso_miou": 0.6266666665831112,
         "macro_miou": null,
         "pose_aware_recall_at_1": 1.0,
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.528850847812733,
+        "meso_soft_iou": 0.5318560872390863,
         "macro_soft_iou": null
       },
       {
         "instance_id": "908",
-        "micro_miou": 0.3749999998828125,
-        "meso_miou": 0.14285714278911565,
+        "micro_miou": 0.24137931026159334,
+        "meso_miou": 0.13333333324444444,
         "macro_miou": null,
         "pose_aware_recall_at_1": 0.3,
         "pose_aware_recall_at_5": 0.3,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.41245238282664526,
-        "meso_soft_iou": 0.20096264088953208,
+        "micro_soft_iou": 0.3893185259935557,
+        "meso_soft_iou": 0.18762940208011977,
         "macro_soft_iou": null
       },
       {
@@ -347,8 +347,8 @@
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.07628640055988292,
-        "meso_soft_iou": 0.04696728288438528,
+        "micro_soft_iou": 0.05388033147164575,
+        "meso_soft_iou": 0.0351439046238944,
         "macro_soft_iou": null
       },
       {
@@ -360,21 +360,21 @@
         "pose_aware_recall_at_5": 1.0,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
-        "micro_soft_iou": 0.06453253900436898,
+        "micro_soft_iou": 0.04949166354882661,
         "meso_soft_iou": null,
         "macro_soft_iou": null
       },
       {
         "instance_id": "822",
         "micro_miou": 0.0,
-        "meso_miou": 0.22580645154006243,
+        "meso_miou": 0.0645161290114464,
         "macro_miou": null,
         "pose_aware_recall_at_1": 0.4,
         "pose_aware_recall_at_5": 0.4,
         "cascade_consistency_rate": null,
         "sim_exec_success": null,
         "micro_soft_iou": null,
-        "meso_soft_iou": 0.3764097964429174,
+        "meso_soft_iou": 0.29069506426507574,
         "macro_soft_iou": null
       }
     ]
