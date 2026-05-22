@@ -276,12 +276,36 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True, help="path to yaml config")
     parser.add_argument("--debug", action="store_true", help="2 epoch 快测")
+    parser.add_argument("--seed", type=int, default=None,
+                        help="覆盖 yaml 里的 train.seed；同时把 ckpt_dir 末尾的 seed42 替换成 seed<N>，"
+                             "wandb run_name 也加 _seed<N> 后缀（阶段三多 seed 用）")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     variant = cfg.get("variant", "unknown")
     print(f"=== Training MicroReach (variant={variant}) ===")
     print(f"Config: {args.config}")
+
+    # 阶段三：CLI --seed N 覆盖 yaml 里的 train.seed，并自动改 ckpt_dir + wandb name
+    if args.seed is not None:
+        old_seed = cfg["train"]["seed"]
+        cfg["train"]["seed"] = args.seed
+        # ckpt_dir: ckpts/m1_seed42 → ckpts/m1_seed43
+        import re
+        old_dir = cfg["train"]["ckpt_dir"]
+        new_dir = re.sub(r"seed\d+", f"seed{args.seed}", old_dir)
+        if new_dir == old_dir:
+            new_dir = f"{old_dir}_seed{args.seed}"
+        cfg["train"]["ckpt_dir"] = new_dir
+        # wandb run_name 同步
+        if "wandb" in cfg and "run_name" in cfg["wandb"]:
+            old_name = cfg["wandb"]["run_name"]
+            new_name = re.sub(r"seed\d+", f"seed{args.seed}", old_name)
+            if new_name == old_name:
+                new_name = f"{old_name}_seed{args.seed}"
+            cfg["wandb"]["run_name"] = new_name
+        print(f"[CLI override] seed: {old_seed} -> {args.seed}")
+        print(f"[CLI override] ckpt_dir: {old_dir} -> {new_dir}")
 
     # 随机种子
     set_seed(cfg["train"]["seed"])
