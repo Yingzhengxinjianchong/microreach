@@ -1,0 +1,51 @@
+# M2: 双层级联 R_geom + R_contact（无 R_exec）
+#
+# 阶段三 P1：依赖 hyh 在所有 .npz 里补齐 R_contact 真值。
+# 在此之前可用 --cascade-synthetic 跑 smoke test（R_contact = R_geom × 0.8 合成）。
+#
+# 设计依据：
+#   - 监督结构：MoMaGen ICLR 2026 "soft constraint" 在 base placement 上做硬约束，
+#               我们扩展到 micro 末端尺度，加入 cascade 一致性 R_contact ≤ R_geom；
+#   - Loss 权重：参考 Kendall et al. CVPR 2018 (Multi-Task Learning Using Uncertainty
+#                 to Weigh Losses)，主任务 L_geom 0.5、次任务 L_contact 0.3、
+#                 cascade 一致性正则 0.2；
+#   - mu warmup：参考 Bengio et al. 2009 Curriculum Learning，前 50 epoch 关 cascade
+#                 项防止 loss landscape 不稳，之后线性 ramp。
+
+_base_: default.yaml
+
+variant: m2
+
+model:
+  use_pose_decoder: true            # 与 M1 完全一致，仅多 ContactHead
+  heads:
+    geom:    true                   # ✅
+    contact: true                   # ✅ M2 关键 override
+    exec:    false                  # ❌ M_full 才启用
+
+target_mode: per_query              # 同 M1，(M, 24) 全密度监督
+
+# 阶段三数据加载：让 dataset.py 同时读 R_contact 字段
+data:
+  load_contact: true
+  load_exec:    false
+
+loss:
+  type: bce                         # 各 head 单独的 BCE-with-logits
+  # 多 head 权重（基于 Kendall CVPR 2018 经验：主任务略高）
+  head_weights:
+    geom:    0.5
+    contact: 0.3
+    # exec  在 M_full 才有
+  cascade_consistency: true
+  cascade_mu:          0.1          # cascade1 = relu(p_contact - p_geom)
+  cascade_mu_warmup_epochs: 50      # 前 50 epoch mu=0；50-100 epoch 线性 ramp 到 0.1
+                                    # （Bengio Curriculum Learning 思想）
+
+train:
+  epochs: 100
+  seed: 42
+  ckpt_dir: ckpts/m2_seed42
+
+wandb:
+  run_name: gjw_m2_seed42

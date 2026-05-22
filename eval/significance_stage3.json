@@ -1,0 +1,461 @@
+{
+  "inputs": [
+    "eval/results_stage3_seed42.json",
+    "eval/results_stage3_seed43.json",
+    "eval/results_stage3_seed44.json"
+  ],
+  "baseline": "m0",
+  "n_variants": 5,
+  "mean_std": {
+    "micro_miou": {
+      "m0": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n": 18
+      },
+      "m1": {
+        "mean": 0.02858921345750287,
+        "std": 0.09519904264984382,
+        "n": 18
+      },
+      "m1_focal": {
+        "mean": 0.1234400464134379,
+        "std": 0.24787292637312133,
+        "n": 18
+      },
+      "m1_composite": {
+        "mean": 0.12739313207265424,
+        "std": 0.24453148244295125,
+        "n": 18
+      },
+      "where2act": {
+        "mean": 0.188532110074415,
+        "std": 0.1990269831605061,
+        "n": 18
+      }
+    },
+    "meso_miou": {
+      "m0": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n": 12
+      },
+      "m1": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n": 12
+      },
+      "m1_focal": {
+        "mean": 0.1772057588179555,
+        "std": 0.24484201675021697,
+        "n": 12
+      },
+      "m1_composite": {
+        "mean": 0.18982121557468892,
+        "std": 0.24973192815200596,
+        "n": 12
+      },
+      "where2act": {
+        "mean": 0.42432560133735814,
+        "std": 0.27183928960282633,
+        "n": 12
+      }
+    },
+    "macro_miou": {
+      "m0": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "m1": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "m1_focal": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "m1_composite": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "where2act": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      }
+    },
+    "micro_soft_iou": {
+      "m0": {
+        "mean": 0.20803018335594994,
+        "std": 0.1337686578414214,
+        "n": 12
+      },
+      "m1": {
+        "mean": 0.21574343435185273,
+        "std": 0.17494549338205256,
+        "n": 12
+      },
+      "m1_focal": {
+        "mean": 0.4062597313177561,
+        "std": 0.12090071515914383,
+        "n": 12
+      },
+      "m1_composite": {
+        "mean": 0.24713618645174518,
+        "std": 0.19711012980743084,
+        "n": 12
+      },
+      "where2act": {
+        "mean": 0.36463705582586886,
+        "std": 0.1795379913566573,
+        "n": 12
+      }
+    },
+    "meso_soft_iou": {
+      "m0": {
+        "mean": 0.1895004318024214,
+        "std": 0.10230750139445757,
+        "n": 12
+      },
+      "m1": {
+        "mean": 0.18799902665083967,
+        "std": 0.12859311756711256,
+        "n": 12
+      },
+      "m1_focal": {
+        "mean": 0.3503782774142943,
+        "std": 0.16401431635301847,
+        "n": 12
+      },
+      "m1_composite": {
+        "mean": 0.2528142502342348,
+        "std": 0.17495699844309132,
+        "n": 12
+      },
+      "where2act": {
+        "mean": 0.35992572813032225,
+        "std": 0.2303629868618277,
+        "n": 12
+      }
+    },
+    "macro_soft_iou": {
+      "m0": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "m1": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "m1_focal": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "m1_composite": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      },
+      "where2act": {
+        "mean": NaN,
+        "std": NaN,
+        "n": 0
+      }
+    },
+    "pose_aware_recall_at_1": {
+      "m0": {
+        "mean": 0.46666666666666656,
+        "std": 0.31248529377161005,
+        "n": 18
+      },
+      "m1": {
+        "mean": 0.6,
+        "std": 0.3497898528780825,
+        "n": 18
+      },
+      "m1_focal": {
+        "mean": 0.6,
+        "std": 0.33606722016672236,
+        "n": 18
+      },
+      "m1_composite": {
+        "mean": 0.5333333333333333,
+        "std": 0.35313720046596786,
+        "n": 18
+      },
+      "where2act": {
+        "mean": 0.46666666666666656,
+        "std": 0.31248529377161005,
+        "n": 18
+      }
+    },
+    "pose_aware_recall_at_5": {
+      "m0": {
+        "mean": 0.6833333333333333,
+        "std": 0.35850998837508824,
+        "n": 18
+      },
+      "m1": {
+        "mean": 0.7222222222222222,
+        "std": 0.29814239699997197,
+        "n": 18
+      },
+      "m1_focal": {
+        "mean": 0.7222222222222222,
+        "std": 0.29814239699997197,
+        "n": 18
+      },
+      "m1_composite": {
+        "mean": 0.7222222222222222,
+        "std": 0.29814239699997197,
+        "n": 18
+      },
+      "where2act": {
+        "mean": 0.6833333333333333,
+        "std": 0.35850998837508824,
+        "n": 18
+      }
+    }
+  },
+  "pairwise_vs_baseline": {
+    "m1": {
+      "micro_miou": {
+        "n_pairs": 18,
+        "mean_diff": 0.02858921345750287,
+        "t_stat": 1.2741069327101988,
+        "p_value": 0.21976873547614612,
+        "stars": ""
+      },
+      "meso_miou": {
+        "n_pairs": 12,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "macro_miou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "micro_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.007713250995902793,
+        "t_stat": 0.4995970626766162,
+        "p_value": 0.6272008873472008,
+        "stars": ""
+      },
+      "meso_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": -0.001501405151581763,
+        "t_stat": -0.12620334991711205,
+        "p_value": 0.9018481660198989,
+        "stars": ""
+      },
+      "macro_soft_iou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "pose_aware_recall_at_1": {
+        "n_pairs": 18,
+        "mean_diff": 0.13333333333333336,
+        "t_stat": 1.6920868460976943,
+        "p_value": 0.10887582558554593,
+        "stars": ""
+      },
+      "pose_aware_recall_at_5": {
+        "n_pairs": 18,
+        "mean_diff": 0.03888888888888889,
+        "t_stat": 1.8003458379396915,
+        "p_value": 0.08957559959213503,
+        "stars": ""
+      }
+    },
+    "m1_focal": {
+      "micro_miou": {
+        "n_pairs": 18,
+        "mean_diff": 0.12344004641343788,
+        "t_stat": 2.112823578583185,
+        "p_value": 0.049709174429562165,
+        "stars": "*"
+      },
+      "meso_miou": {
+        "n_pairs": 12,
+        "mean_diff": 0.1772057588179555,
+        "t_stat": 2.507162632789607,
+        "p_value": 0.029133059853959916,
+        "stars": "*"
+      },
+      "macro_miou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "micro_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.19822954796180622,
+        "t_stat": 3.7066340597789025,
+        "p_value": 0.0034613809166287516,
+        "stars": "**"
+      },
+      "meso_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.16087784561187293,
+        "t_stat": 3.622650953595501,
+        "p_value": 0.004007833298732554,
+        "stars": "**"
+      },
+      "macro_soft_iou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "pose_aware_recall_at_1": {
+        "n_pairs": 18,
+        "mean_diff": 0.13333333333333336,
+        "t_stat": 1.6745517941646975,
+        "p_value": 0.1123185870187635,
+        "stars": ""
+      },
+      "pose_aware_recall_at_5": {
+        "n_pairs": 18,
+        "mean_diff": 0.03888888888888889,
+        "t_stat": 1.8003458379396915,
+        "p_value": 0.08957559959213503,
+        "stars": ""
+      }
+    },
+    "m1_composite": {
+      "micro_miou": {
+        "n_pairs": 18,
+        "mean_diff": 0.1273931320726542,
+        "t_stat": 2.2102809830104286,
+        "p_value": 0.041084590899254925,
+        "stars": "*"
+      },
+      "meso_miou": {
+        "n_pairs": 12,
+        "mean_diff": 0.18982121557468898,
+        "t_stat": 2.633063318437404,
+        "p_value": 0.02327962282910314,
+        "stars": "*"
+      },
+      "macro_miou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "micro_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.03910600309579521,
+        "t_stat": 1.7066393308178667,
+        "p_value": 0.11592516315739168,
+        "stars": ""
+      },
+      "meso_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.06331381843181343,
+        "t_stat": 2.843626617443065,
+        "p_value": 0.01597787142185645,
+        "stars": "*"
+      },
+      "macro_soft_iou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "pose_aware_recall_at_1": {
+        "n_pairs": 18,
+        "mean_diff": 0.06666666666666668,
+        "t_stat": 0.6666666666666667,
+        "p_value": 0.5139321113914507,
+        "stars": ""
+      },
+      "pose_aware_recall_at_5": {
+        "n_pairs": 18,
+        "mean_diff": 0.03888888888888889,
+        "t_stat": 1.8003458379396915,
+        "p_value": 0.08957559959213503,
+        "stars": ""
+      }
+    },
+    "where2act": {
+      "micro_miou": {
+        "n_pairs": 18,
+        "mean_diff": 0.18853211007441498,
+        "t_stat": 4.018922401014857,
+        "p_value": 0.0008899656375796794,
+        "stars": "***"
+      },
+      "meso_miou": {
+        "n_pairs": 12,
+        "mean_diff": 0.42432560133735814,
+        "t_stat": 5.407264722787735,
+        "p_value": 0.00021428104098279412,
+        "stars": "***"
+      },
+      "macro_miou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "micro_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.15660687246991886,
+        "t_stat": 2.1672971754231205,
+        "p_value": 0.053026193048637184,
+        "stars": ""
+      },
+      "meso_soft_iou": {
+        "n_pairs": 12,
+        "mean_diff": 0.17042529632790074,
+        "t_stat": 2.306902482594934,
+        "p_value": 0.04152449190821586,
+        "stars": "*"
+      },
+      "macro_soft_iou": {
+        "n_pairs": 0,
+        "mean_diff": NaN,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "pose_aware_recall_at_1": {
+        "n_pairs": 18,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "pose_aware_recall_at_5": {
+        "n_pairs": 18,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      }
+    }
+  }
+}

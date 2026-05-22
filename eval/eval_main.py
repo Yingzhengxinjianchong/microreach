@@ -78,14 +78,24 @@ def predict_on_test(
     model: MicroReachNet,
     test_loader: DataLoader,
     device: torch.device,
-) -> List[Tuple[str, np.ndarray, np.ndarray, List[str]]]:
+) -> List[Dict[str, Any]]:
     """
-    对 test 集所有实例跑预测，返回每实例的 (id, pred (M,24), gt (M,24), tiers list)。
+    对 test 集所有实例跑预测。
 
-    M0 模型输出 (B, M) 被广播成 (B, M, K) 以便跟 GT 形状一致（M0 不学方向，所有 query 共享）。
+    Returns: list of dict per instance, with keys:
+        "instance_id": str
+        "pred_geom":   (M, 24) float       —— 主输出（与之前向后兼容）
+        "gt_geom":     (M, 24) float
+        "tiers":       list[str] of len M
+        # 阶段三多头模型才有：
+        "pred_contact": (M, 24) or None
+        "gt_contact":   (M, 24) or None    (npz NaN 时 None)
+        "pred_exec":    (M, 24) or None
+        "gt_exec":      (M, 24) or None
     """
-    n_queries = 24   # 阶段二中期 8ψ × 3g
-    out: List[Tuple[str, np.ndarray, np.ndarray, List[str]]] = []
+    n_queries = 24
+    out: List[Dict[str, Any]] = []
+    is_multi = bool(getattr(model, "multi_head", False))
 
     for batch in test_loader:
         pc = batch["point_cloud"].to(device)
@@ -95,39 +105,64 @@ def predict_on_test(
         instance_ids = batch["instance_id"]
 
         if model.use_pose_decoder:
-            logits = model(pc, cp, q)                    # (B, M_max, K)
-            pred = torch.sigmoid(logits)                 # (B, M_max, K)
+            output = model(pc, cp, q)
         else:
-            logits = model(pc, cp)                       # (B, M_max)
-            pred_scalar = torch.sigmoid(logits)          # (B, M_max)
-            pred = pred_scalar.unsqueeze(-1).expand(-1, -1, n_queries)  # broadcast (B, M_max, K)
+            output = model(pc, cp)
 
-        target = batch["target"].to(device)              # 可能 (B, M_max, K) 或 (B, M_max)
+        # output 可能是 Tensor (M0/M1 单头) 或 dict (M2/M_full 多头)
+        if isinstance(output, dict):
+            pred_geom = torch.sigmoid(output["geom"])                 # (B, M_max, K)
+            pred_contact_t = torch.sigmoid(output["contact"]) if "contact" in output else None
+            pred_exec_t    = torch.sigmoid(output["exec"])    if "exec"    in output else None
+        else:
+            if model.use_pose_decoder:
+                pred_geom = torch.sigmoid(output)                     # (B, M_max, K)
+            else:
+                pred_scalar = torch.sigmoid(output)                   # (B, M_max)
+                pred_geom = pred_scalar.unsqueeze(-1).expand(-1, -1, n_queries)
+            pred_contact_t = None
+            pred_exec_t    = None
+
+        target = batch["target"].to(device)              # (B, M_max, K) 或 (B, M_max)
+
+        # 处理 target（M0 时是单值需重新从 npz 读 (M, K) 真值）
         if target.dim() == 2:
-            # M0 用 per_point_mean 训的，target 是 (B, M_max)；评测时我们要 (M, K)
-            # 不过 evaluate 时只看预测/GT 在 (M, K) 上的关系——
-            # 这里加载真实 R_geom 标签 (M, K) 来评测才公平。
-            # 重新从 .npz 读 R_geom（per_query 形式）：
             target_full_list = []
             for iid in instance_ids:
                 npz = np.load(_REPO_ROOT / "data" / f"{iid}.npz", allow_pickle=True)
-                target_full_list.append(npz["R_geom"])           # (M, K)，未 padding
-            # 不用 padding，直接逐实例处理
-            for b, iid in enumerate(instance_ids):
-                M_valid = int(mask[b].sum().item())
-                pred_b = pred[b, :M_valid].cpu().numpy()         # (M, K)
-                gt_b   = target_full_list[b]                     # (M, K)，可能 M_valid 一致
-                gt_b = gt_b[:M_valid]                            # 防 padding 引入
-                tiers = _load_tiers(iid, M_valid)
-                out.append((iid, pred_b, gt_b, tiers))
+                target_full_list.append(npz["R_geom"])
         else:
-            # M1：target 已经是 (B, M_max, K)
-            for b, iid in enumerate(instance_ids):
-                M_valid = int(mask[b].sum().item())
-                pred_b = pred[b, :M_valid].cpu().numpy()
-                gt_b   = target[b, :M_valid].cpu().numpy()
-                tiers = _load_tiers(iid, M_valid)
-                out.append((iid, pred_b, gt_b, tiers))
+            target_full_list = None
+
+        for b, iid in enumerate(instance_ids):
+            M_valid = int(mask[b].sum().item())
+            entry: Dict[str, Any] = {
+                "instance_id": iid,
+                "pred_geom":   pred_geom[b, :M_valid].cpu().numpy(),
+                "tiers":       _load_tiers(iid, M_valid),
+            }
+            if target_full_list is not None:
+                entry["gt_geom"] = target_full_list[b][:M_valid]
+            else:
+                entry["gt_geom"] = target[b, :M_valid].cpu().numpy()
+
+            # 多头预测（如果模型有的话）
+            if pred_contact_t is not None:
+                entry["pred_contact"] = pred_contact_t[b, :M_valid].cpu().numpy()
+            if pred_exec_t is not None:
+                entry["pred_exec"]    = pred_exec_t[b, :M_valid].cpu().numpy()
+
+            # 多头 GT（从 npz 直读；NaN 时返回 None 由 evaluate_instance 判断）
+            if is_multi:
+                npz = np.load(_REPO_ROOT / "data" / f"{iid}.npz", allow_pickle=True)
+                for layer in ["R_contact", "R_exec"]:
+                    if layer in npz.files:
+                        arr = npz[layer][:M_valid]
+                        if not np.isnan(arr).all():
+                            key = "gt_contact" if layer == "R_contact" else "gt_exec"
+                            entry[key] = arr
+
+            out.append(entry)
 
     return out
 
@@ -169,9 +204,14 @@ def evaluate_variant(
     print(f"  test instances: {len(test_ids)} -> {test_ids}")
 
     target_mode = cfg.get("target_mode", "per_query")
+    # 阶段三：M2/M_full 也需要加载 contact/exec 标签
+    data_cfg = cfg["data"]
+    load_contact = bool(data_cfg.get("load_contact", False))
+    load_exec    = bool(data_cfg.get("load_exec",    False))
     test_ds = MicroReachDataset(
         str(npz_dir), test_ids, target_mode,
         cfg["data"]["fields"], num_points=cfg["data"]["num_points"],
+        load_contact=load_contact, load_exec=load_exec,
     )
     test_loader = DataLoader(
         test_ds, batch_size=cfg["train"]["batch_size"],
@@ -182,18 +222,27 @@ def evaluate_variant(
     model = load_ckpt(ckpt_path, cfg, device)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"  params: {n_params:,}")
+    if getattr(model, "multi_head", False):
+        heads_on = []
+        if getattr(model, "use_contact_head", False): heads_on.append("contact")
+        if getattr(model, "use_exec_head", False):    heads_on.append("exec")
+        print(f"  multi-head: geom+{'+'.join(heads_on)}")
 
     # 跑预测
     preds = predict_on_test(model, test_loader, device)
 
-    # 调队友的 evaluate_instance
+    # 调队友的 evaluate_instance（阶段三可传 pred_contact/pred_exec/gt_contact/gt_exec）
     inst_metrics: List[InstanceMetrics] = []
-    for iid, pred, gt, tiers in preds:
+    for entry in preds:
         im = evaluate_instance(
-            instance_id=iid,
-            pred_geom=pred,
-            gt_geom=gt,
-            tiers=tiers,
+            instance_id=entry["instance_id"],
+            pred_geom=entry["pred_geom"],
+            gt_geom=entry["gt_geom"],
+            tiers=entry["tiers"],
+            pred_contact=entry.get("pred_contact"),
+            gt_contact=entry.get("gt_contact"),
+            pred_exec=entry.get("pred_exec"),
+            gt_exec=entry.get("gt_exec"),
             threshold=cfg["eval"]["bce_threshold"],
         )
         inst_metrics.append(im)
@@ -287,10 +336,11 @@ def get_test_ids_from_config(config_path: str) -> List[str]:
 
 def print_table_header() -> None:
     print()
-    print("  " + "-" * 116)
+    print("  " + "-" * 140)
     print(f"  {'method':20s} | {'micro':6s} | {'meso':6s} | {'macro':6s} | "
+          f"{'sIoUmi':6s} | {'sIoUme':6s} | "
           f"{'rec@1':6s} | {'rec@5':6s} | {'cascade':6s} | {'execSucc':8s}")
-    print("  " + "-" * 116)
+    print("  " + "-" * 140)
 
 
 def main():

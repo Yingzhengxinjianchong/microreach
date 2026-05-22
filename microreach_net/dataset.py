@@ -63,7 +63,20 @@ class MicroReachDataset(Dataset):
         fields: Optional[Dict[str, str]] = None,
         num_points: Optional[int] = None,
         max_M: int = 16,
+        load_contact: bool = False,
+        load_exec: bool = False,
+        cascade_synthetic: bool = False,
     ):
+        """
+        阶段三扩展参数：
+            load_contact: True 时同时加载 R_contact (M, 24)，并生成 contact_valid_mask（NaN 处为 0）
+            load_exec:    True 时同时加载 R_exec    (M, 24)
+            cascade_synthetic:
+                True 时若 R_contact / R_exec 全 NaN，则用合成标签替代（仅用于 smoke test，不可用于真训练）：
+                    R_contact_syn = R_geom * 0.8
+                    R_exec_syn    = R_contact_syn * 0.7
+                合成标签满足 cascade 物理约束 R_exec ≤ R_contact ≤ R_geom。
+        """
         self.npz_dir = Path(npz_dir)
         if not self.npz_dir.exists():
             raise FileNotFoundError(
@@ -89,6 +102,9 @@ class MicroReachDataset(Dataset):
         }
         self.num_points = num_points
         self.max_M = max_M
+        self.load_contact = load_contact
+        self.load_exec = load_exec
+        self.cascade_synthetic = cascade_synthetic
 
         self._check_files_exist()
 
@@ -164,7 +180,7 @@ class MicroReachDataset(Dataset):
             target_pad = np.zeros((self.max_M,), dtype=np.float32)
             target_pad[:M] = target
 
-        return {
+        out = {
             "point_cloud": torch.from_numpy(point_cloud),    # (N, 3)
             "candidate_p": torch.from_numpy(candidate_p_pad), # (max_M, 3)
             "queries":     torch.from_numpy(queries_pad),     # (max_M, 24, 4)
@@ -172,6 +188,47 @@ class MicroReachDataset(Dataset):
             "mask":        torch.from_numpy(mask),            # (max_M,) 1=valid, 0=pad
             "instance_id": iid,
         }
+
+        # ──── 阶段三：可选加载 L2 R_contact / L3 R_exec ────
+        # NaN-safe 设计：若标签缺失（npz 字段为 NaN），生成对应位置的 valid_mask=0，
+        # 训练时该 head 的 loss 自动跳过这部分（参考 UPSNet CVPR 2019 处理 missing modality）
+        if self.load_contact or self.load_exec:
+            for name, key, want in [
+                ("R_contact", "R_contact", self.load_contact),
+                ("R_exec",    "R_exec",    self.load_exec),
+            ]:
+                if not want:
+                    continue
+                if key not in data.files:
+                    # 没有该字段：标记全 invalid + zero target
+                    layer_pad = np.zeros((self.max_M, 24), dtype=np.float32)
+                    layer_valid = np.zeros((self.max_M, 24), dtype=np.float32)
+                else:
+                    layer = data[key].astype(np.float32)   # (M, 24)
+                    # 检测 NaN
+                    nan_mask = np.isnan(layer)
+                    if nan_mask.all() and self.cascade_synthetic:
+                        # 合成标签（仅 smoke test）：R_contact = R_geom * 0.8, R_exec = 0.7×contact
+                        if name == "R_contact":
+                            layer = r_geom * 0.8
+                        else:  # R_exec
+                            layer = r_geom * 0.8 * 0.7
+                        nan_mask = np.isnan(layer)
+                    # NaN 位置：mark invalid，target 置 0（loss 跳过）
+                    layer = np.where(nan_mask, 0.0, layer)
+                    valid = (~nan_mask).astype(np.float32) * mask[:M, None]  # (M, 24)
+
+                    layer_pad = np.zeros((self.max_M, 24), dtype=np.float32)
+                    layer_pad[:M] = layer
+                    layer_valid = np.zeros((self.max_M, 24), dtype=np.float32)
+                    layer_valid[:M] = valid
+
+                tname = "target_contact" if name == "R_contact" else "target_exec"
+                vname = "valid_contact"  if name == "R_contact" else "valid_exec"
+                out[tname] = torch.from_numpy(layer_pad)    # (max_M, 24)
+                out[vname] = torch.from_numpy(layer_valid)  # (max_M, 24) 1=valid
+
+        return out
 
 
 # ──────────────────────────────────────────────
@@ -265,3 +322,51 @@ if __name__ == "__main__":
         print("\n[OK] Dataset smoke test passed")
     except RuntimeError as e:
         print(f"\n[FAIL] Default collate failed:\n  {e}")
+
+    # ─── 阶段三：多层标签加载测试 ───
+    print("\n=== Multi-layer label test (load_contact + load_exec) ===")
+
+    print("\n  [A] 无 --cascade-synthetic：R_contact/R_exec 应该全 invalid（hyh 未补标签）")
+    ds_multi = MicroReachDataset(
+        npz_dir=str(npz_dir),
+        instance_ids=train_ids[:2],
+        target_mode="per_query",
+        load_contact=True, load_exec=True,
+        cascade_synthetic=False,
+    )
+    s = ds_multi[0]
+    has_keys = sorted(s.keys())
+    print(f"    keys: {has_keys}")
+    assert "target_contact" in s and "valid_contact" in s
+    assert "target_exec"    in s and "valid_exec"    in s
+    print(f"    target_contact: shape={tuple(s['target_contact'].shape)}, "
+          f"valid_contact sum={s['valid_contact'].sum().item():.0f}")
+    print(f"    target_exec:    shape={tuple(s['target_exec'].shape)}, "
+          f"valid_exec sum={s['valid_exec'].sum().item():.0f}")
+
+    print("\n  [B] --cascade-synthetic=True：合成 R_contact=R_geom×0.8, R_exec=R_geom×0.56")
+    ds_syn = MicroReachDataset(
+        npz_dir=str(npz_dir),
+        instance_ids=train_ids[:2],
+        target_mode="per_query",
+        load_contact=True, load_exec=True,
+        cascade_synthetic=True,
+    )
+    s2 = ds_syn[0]
+    target_geom    = s2["target"]
+    target_contact = s2["target_contact"]
+    target_exec    = s2["target_exec"]
+    valid_mask     = s2["mask"].unsqueeze(-1)            # (M, 1)
+    M_valid = int(s2["mask"].sum().item())
+    # 在 valid 行检查 cascade 约束
+    diff_gc = (target_contact[:M_valid] - target_geom[:M_valid]).abs().mean()
+    diff_ce = (target_exec[:M_valid]    - target_contact[:M_valid]*0.7).abs().mean()
+    print(f"    valid candidates: {M_valid}")
+    print(f"    mean|R_contact_syn - R_geom×0.8| = {diff_gc:.4f} (期望 ≈ 0.2× R_geom 但实测应 ≈ R_geom×0.2)")
+    print(f"    mean|R_exec_syn - R_contact×0.7| = {diff_ce:.6f} (期望 ≈ 0) ✓")
+    assert diff_ce < 1e-5, f"合成 R_exec 应严格等于 R_contact×0.7，差 {diff_ce}"
+    # 物理约束 R_exec ≤ R_contact ≤ R_geom
+    assert (target_exec[:M_valid] <= target_contact[:M_valid] + 1e-5).all().item()
+    assert (target_contact[:M_valid] <= target_geom[:M_valid] + 1e-5).all().item()
+    print("    cascade R_exec ≤ R_contact ≤ R_geom ✓")
+    print("\n[OK] Multi-layer label test passed")
