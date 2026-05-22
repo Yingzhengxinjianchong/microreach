@@ -291,17 +291,21 @@ def main():
         old_seed = cfg["train"]["seed"]
         cfg["train"]["seed"] = args.seed
         # ckpt_dir: ckpts/m1_seed42 → ckpts/m1_seed43
+        # 修复：只有当原 dir 真没 seedN 模式时才追加；
+        # 否则即使 new==old（如 yaml seed42 + --seed 42）也保持单后缀，不要叠成 seed42_seed42
         import re
         old_dir = cfg["train"]["ckpt_dir"]
-        new_dir = re.sub(r"seed\d+", f"seed{args.seed}", old_dir)
-        if new_dir == old_dir:
+        if re.search(r"seed\d+", old_dir):
+            new_dir = re.sub(r"seed\d+", f"seed{args.seed}", old_dir)
+        else:
             new_dir = f"{old_dir}_seed{args.seed}"
         cfg["train"]["ckpt_dir"] = new_dir
-        # wandb run_name 同步
+        # wandb run_name 同步（同样逻辑）
         if "wandb" in cfg and "run_name" in cfg["wandb"]:
             old_name = cfg["wandb"]["run_name"]
-            new_name = re.sub(r"seed\d+", f"seed{args.seed}", old_name)
-            if new_name == old_name:
+            if re.search(r"seed\d+", old_name):
+                new_name = re.sub(r"seed\d+", f"seed{args.seed}", old_name)
+            else:
                 new_name = f"{old_name}_seed{args.seed}"
             cfg["wandb"]["run_name"] = new_name
         print(f"[CLI override] seed: {old_seed} -> {args.seed}")
