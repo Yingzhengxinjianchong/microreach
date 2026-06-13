@@ -1193,3 +1193,100 @@ The 200-instance label set is ready for M2 training.
 This commit finalizes the Stage 3 P1 label set.
 
 The generated labels cover `R_geom` and `R_contact`. `R_exec` remains intentionally unfilled and will be handled in a later stage.
+
+---
+
+# Stage 3 P2 R_exec Label Generation - 6.13 - hyh
+
+## Goal
+
+Complete third-level execution labels for the 200-instance eval set:
+
+```text
+R_exec <= R_contact <= R_geom
+```
+
+Before this step, all 200 `.npz` files already contained valid `R_geom`, `R_contact_raw`, and cascade-safe `R_contact`, while `R_exec` was still NaN.
+
+## Implementation
+
+Added analytic R_exec labeling:
+
+* `label_gen/r_exec.py`
+* `label_gen/patch_r_exec.py`
+
+The implementation reads PartNet-Mobility articulation metadata from:
+
+* `mobility.urdf`
+* `semantics.txt`
+
+Candidate parts are mapped to movable joints by:
+
+1. exact link match when reliable;
+2. semantic-name match plus geometric disambiguation otherwise.
+
+For multiple joints with the same semantic name, the nearest joint axis to the candidate point is selected.
+
+Execution score is computed analytically:
+
+* prismatic joints: alignment between query direction and joint axis
+* revolute / continuous joints: alignment between query direction and local tangential motion around the joint axis
+
+Static or unmapped candidates are assigned `R_exec_raw = 0`.
+
+Final labels are cascade-clamped:
+
+```text
+R_exec = min(R_exec_raw, R_contact)
+```
+
+## Results
+
+Ran:
+
+```bash
+python label_gen/patch_r_exec.py --force --enforce-cascade
+```
+
+Patch summary:
+
+* processed: 200
+* written: 200
+* failed: 0
+* missing `.npz`: 0
+
+Mapping summary:
+
+| Mapping status     | Count |
+| ------------------ | ----: |
+| semantic           |  1354 |
+| exact              |   295 |
+| static_or_unmapped |   170 |
+
+Joint type summary:
+
+| Joint type        | Count |
+| ----------------- | ----: |
+| revolute          |   815 |
+| prismatic         |   561 |
+| continuous        |   273 |
+| static / unmapped |   170 |
+
+Overall label means:
+
+* `R_exec_raw` mean: 0.4704
+* `R_exec` mean: 0.0420
+
+The lower final `R_exec` mean is expected because `R_exec` is clamped by `R_contact`.
+
+## Validation
+
+Final validation passed:
+
+* 200 `.npz` files present
+* `R_exec` all-NaN: 0
+* `R_exec_raw` missing: 0
+* `R_exec > R_contact` violations: 0 / 43656
+* `R_contact > R_geom` violations: 0 / 43656
+
+The 200-instance eval set now contains complete three-level labels and is ready for full MicroReach training.
