@@ -1,0 +1,9 @@
+{
+  "num_patched": 47,
+  "num_skipped": 0,
+  "total_queries": 8424,
+  "total_violations": 6266,
+  "violation_rate": 0.7438,
+  "consistency_tol": 0.05,
+  "notes": "R_contact computed by batch_compute_r_contact with default normals/axes=[0,0,1], matching load_instance() behavior in batch_generate.py"
+}
