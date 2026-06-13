@@ -97,6 +97,78 @@ FAILURE_LOG_PATH = DATA_DIR / "failure_cases.jsonl"
 CHECKPOINT_EVERY = 10        # 每处理 N 个实例保存一次断点
 CONSISTENCY_TOL = 0.05       # R_contact ≤ R_geom 容差
 GIT_AUTO_PUSH = False         # 全部完成后手动 git push
+MAX_CANDIDATES = 16           # 与 microreach_net.dataset 默认 max_M 对齐
+
+
+
+
+def cap_candidate_points(
+    candidate_p: np.ndarray,
+    part_info: Dict[str, Any],
+    instance_id: str,
+    max_candidates: int = MAX_CANDIDATES,
+) -> tuple[np.ndarray, Dict[str, Any]]:
+    """
+    Limit candidate points to max_candidates.
+
+    New categories can produce M=30 or more candidate points, while the
+    training Dataset currently pads to max_M=16 by default. This deterministic
+    cap keeps generated .npz files compatible with the existing training code.
+    """
+    M = int(candidate_p.shape[0])
+    if M <= max_candidates:
+        return candidate_p, part_info
+
+    # Deterministic per-instance subsampling.
+    seed = int(instance_id) if str(instance_id).isdigit() else sum(ord(c) for c in str(instance_id))
+    rng = np.random.default_rng(seed)
+    keep = np.sort(rng.choice(M, size=max_candidates, replace=False)).astype(int)
+
+    logging.warning(
+        f"  [cap] {instance_id}: candidate_p M={M} > {max_candidates}, "
+        f"keep indices={keep.tolist()}"
+    )
+
+    candidate_p = candidate_p[keep]
+    part_info = dict(part_info or {})
+
+    # Slice list/array fields aligned with candidate_p.
+    for key in ("part_ids", "part_tiers"):
+        if key not in part_info:
+            continue
+        v = part_info[key]
+        try:
+            if len(v) == M:
+                if isinstance(v, np.ndarray):
+                    part_info[key] = v[keep]
+                else:
+                    part_info[key] = [v[i] for i in keep]
+        except TypeError:
+            pass
+
+    # Remap candidate-indexed dict fields, used by r_contact when not skipped.
+    for key in ("normals", "axes"):
+        if key not in part_info:
+            continue
+        v = part_info[key]
+        if isinstance(v, dict):
+            new_v = {}
+            default = np.array([0.0, 0.0, 1.0], dtype=np.float32)
+            for new_i, old_i in enumerate(keep):
+                old_i_int = int(old_i)
+                new_v[new_i] = v.get(old_i_int, v.get(str(old_i_int), default))
+            part_info[key] = new_v
+        else:
+            try:
+                if len(v) == M:
+                    if isinstance(v, np.ndarray):
+                        part_info[key] = v[keep]
+                    else:
+                        part_info[key] = [v[i] for i in keep]
+            except TypeError:
+                pass
+
+    return candidate_p, part_info
 
 
 # ---------------------------------------------------------------------------
@@ -245,6 +317,12 @@ def process_instance(
 
         logging.info(
             f"  [loader] 点云={point_cloud.shape}，候选点={candidate_p.shape[0]}"
+        )
+
+        candidate_p, part_info = cap_candidate_points(
+            candidate_p=candidate_p,
+            part_info=part_info,
+            instance_id=instance_id,
         )
 
         # ---- Step 2: sample_queries → queries ----
