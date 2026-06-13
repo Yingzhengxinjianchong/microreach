@@ -987,3 +987,83 @@ pred_geom` during M2 training even when GT labels violate the constraint.
 - gjw notified: M2 training (3 seed, `configs/m2.yaml`) can now start
 - Pending: P1 — 200-instance expansion to 5 categories
 - Pending: P2 — R_exec label generation (`label_gen/r_exec.py`)
+
+---
+
+# Stage 3 P1 Eval-Set Expansion - 6.13 - hyh
+
+## Goal
+
+Extend the Stage 2 47-instance Faucet eval set to a 200-instance multi-category eval set, without modifying existing 47 Faucet `.npz` label files.
+
+## Category Selection
+
+Ran `label_gen/select_instances.py` on available PartNet-Mobility categories. Valid instance counts:
+
+| Category         | Valid instances | Decision |
+| ---------------- | --------------: | -------- |
+| StorageFurniture |             346 | used     |
+| Switch           |              70 | used     |
+| CoffeeMachine    |              54 | used     |
+| Dishwasher       |              47 | used     |
+| Laptop           |               0 | skipped  |
+
+Laptop was skipped because the current selector found 0 valid instances under the existing category / semantic filtering rules. No selector logic was modified in this commit.
+
+## Added Instances
+
+Selected 153 new instances:
+
+| Category         | Instances |
+| ---------------- | --------: |
+| StorageFurniture |        60 |
+| Switch           |        40 |
+| CoffeeMachine    |        40 |
+| Dishwasher       |        13 |
+| **Total**        |   **153** |
+
+Merged with the existing 47 Faucet instances to produce:
+
+* `data/eval_set_200.json`
+* Total instances: 200
+* Categories:
+
+  * Faucet: 47
+  * StorageFurniture: 60
+  * Switch: 40
+  * CoffeeMachine: 40
+  * Dishwasher: 13
+
+## Part Tier Distribution
+
+Final merged 200-instance eval set:
+
+| Tier            |   Count |
+| --------------- | ------: |
+| micro           |     475 |
+| meso            |      79 |
+| macro           |     173 |
+| **total parts** | **727** |
+
+The old 47 Faucet records were kept unchanged. The new 153 instances contribute 397 micro / 65 meso / 143 macro parts.
+
+## Validation
+
+Validation checks passed:
+
+* 200 total records
+* No duplicate `instance_id`
+* No empty part records
+* No `unknown` tier
+* Category counts match the planned 47 + 153 split
+* `data/eval_set_200.json` exactly matches direct concatenation of:
+
+  * `data/eval_set_47_faucet_relative_success.json`
+  * `/tmp/eval_StorageFurniture_60.json`
+  * `/tmp/eval_Switch_40.json`
+  * `/tmp/eval_CoffeeMachine_40.json`
+  * `/tmp/eval_Dishwasher_13.json`
+
+## Notes
+
+This commit only completes the P1 eval-set JSON expansion. It does not generate labels for the new 153 instances yet, and it does not touch the existing 47 Faucet `.npz` files.
