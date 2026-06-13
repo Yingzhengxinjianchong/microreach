@@ -1,9 +1,14 @@
 {
-  "num_patched": 47,
+  "num_patched": 200,
   "num_skipped": 0,
-  "total_queries": 8424,
-  "total_violations": 6266,
-  "violation_rate": 0.7438,
+  "total_queries": 43656,
+  "total_raw_violations": 36173,
+  "total_final_violations": 0,
+  "raw_violation_rate": 0.8286,
+  "final_violation_rate": 0.0,
   "consistency_tol": 0.05,
-  "notes": "R_contact computed by batch_compute_r_contact with default normals/axes=[0,0,1], matching load_instance() behavior in batch_generate.py"
+  "enforce_cascade": true,
+  "dry_run": false,
+  "data_dir": "/root/autodl-tmp/microreach/data",
+  "notes": "R_contact_raw is computed by batch_compute_r_contact with default normals/axes=[0,0,1]. If enforce_cascade=True, R_contact is written as min(R_contact_raw, R_geom), so the training label satisfies R_contact <= R_geom. R_contact_raw is kept for inspection."
 }

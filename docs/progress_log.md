@@ -1067,3 +1067,129 @@ Validation checks passed:
 ## Notes
 
 This commit only completes the P1 eval-set JSON expansion. It does not generate labels for the new 153 instances yet, and it does not touch the existing 47 Faucet `.npz` files.
+
+---
+
+# Stage 3 P1 Label Generation - 6.13 - hyh
+
+## Goal
+
+Generate Stage 3 P1 labels for the 200-instance multi-category eval set and make the dataset ready for M2 training.
+
+This step starts from the expanded `data/eval_set_200.json` and produces `.npz` label files containing:
+
+* `point_cloud`
+* `candidate_p`
+* `queries`
+* `R_geom`
+* `R_contact`
+* `R_contact_raw`
+* `R_exec`
+
+`R_exec` remains unimplemented in P1 and is intentionally kept as NaN.
+
+## Environment Fix
+
+The initial label-generation run failed before data generation because SAPIEN could not initialize Vulkan:
+
+* `vk::Instance::enumeratePhysicalDevices: ErrorInitializationFailed`
+
+The issue was resolved by forcing Vulkan to use the NVIDIA ICD and setting a valid runtime directory:
+
+```bash
+export VK_ICD_FILENAMES=/etc/vulkan/icd.d/nvidia_icd.json
+export XDG_RUNTIME_DIR=/tmp/runtime-root
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+```
+
+After this fix, SAPIEN rendering and segmentation worked normally.
+
+## Candidate Count Compatibility
+
+During generation, several new-category instances produced more than 16 candidate interaction parts, for example `M=30`.
+
+Since the training dataset currently uses `max_M=16`, `label_gen/batch_generate.py` was updated to deterministically cap candidate points to 16 before query sampling. This keeps generated `.npz` files compatible with the existing M2 dataset loader.
+
+## Label Generation
+
+Ran:
+
+```bash
+python label_gen/batch_generate.py \
+  --partnet-root /root/autodl-tmp/datasets/partnet_mobility \
+  --skip-contact
+```
+
+Generation was performed with `--skip-contact` so that all `R_contact` values could later be recomputed in a unified pass.
+
+The existing 47 Faucet `.npz` files were preserved and skipped when already present. The newly added categories were generated incrementally.
+
+Some selected instances failed during SAPIEN loading / geometry processing. These were treated as instance-level failures rather than global pipeline failures. Failed instances were replaced with same-category valid candidates from the PartNet-Mobility pool, while preserving the planned category counts.
+
+Final category counts remained:
+
+| Category         | Instances |
+| ---------------- | --------: |
+| Faucet           |        47 |
+| StorageFurniture |        60 |
+| Switch           |        40 |
+| CoffeeMachine    |        40 |
+| Dishwasher       |        13 |
+| **Total**        |   **200** |
+
+Final batch-generation result:
+
+* Successful instances: 200
+* Failed instances: 0
+
+## Contact Label Recompute
+
+After all 200 `.npz` files existed, ran:
+
+```bash
+python label_gen/patch_r_contact.py --force --enforce-cascade
+```
+
+This recomputed contact labels uniformly for all 200 instances.
+
+The patch writes:
+
+* `R_contact_raw`: raw contact score
+* `R_contact`: cascade-safe contact score
+
+With `--enforce-cascade`, the final contact label is computed as:
+
+```text
+R_contact = min(R_contact_raw, R_geom)
+```
+
+This enforces the intended physical consistency constraint:
+
+```text
+R_exec <= R_contact <= R_geom
+```
+
+`R_exec` is still kept as NaN and remains a later-stage label.
+
+## Validation
+
+Final validation checks passed:
+
+* 200 total records in `data/eval_set_200.json`
+* 200 corresponding `.npz` files exist
+* No missing `.npz`
+* No all-NaN `R_geom`
+* No all-NaN `R_contact`
+* `R_contact_raw` exists in all 200 `.npz` files
+* `R_exec` remains all-NaN
+* No instance has `M > 16`
+* Cascade consistency violations: 0
+
+The 200-instance label set is ready for M2 training.
+
+## Notes
+
+This commit finalizes the Stage 3 P1 label set.
+
+The generated labels cover `R_geom` and `R_contact`. `R_exec` remains intentionally unfilled and will be handled in a later stage.

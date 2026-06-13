@@ -1547,71 +1547,103 @@
     ]
   },
   {
-    "instance_id": "45130",
+    "instance_id": "35059",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "45130",
+        "instance_id": "35059",
         "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.357991,
+        "obb_max_edge_m": 1.290208,
         "tier": "micro",
-        "n_points": 346,
-        "point_cloud_ratio": 0.407059
+        "n_points": 1184,
+        "point_cloud_ratio": 0.604082
       },
       {
-        "instance_id": "45130",
+        "instance_id": "35059",
         "part_id": "link_1:furniture_body",
-        "obb_max_edge_m": 1.577204,
+        "obb_max_edge_m": 1.521783,
         "tier": "macro",
-        "n_points": 504,
-        "point_cloud_ratio": 0.592941
+        "n_points": 776,
+        "point_cloud_ratio": 0.395918
       }
     ]
   },
   {
-    "instance_id": "45177",
+    "instance_id": "40147",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "45177",
-        "part_id": "link_0:furniture_body",
-        "obb_max_edge_m": 1.396666,
-        "tier": "macro",
-        "n_points": 488,
-        "point_cloud_ratio": 0.128421
+        "instance_id": "40147",
+        "part_id": "link_0:rotation_door",
+        "obb_max_edge_m": 0.765351,
+        "tier": "micro",
+        "n_points": 1036,
+        "point_cloud_ratio": 0.363764
       },
       {
-        "instance_id": "45177",
+        "instance_id": "40147",
+        "part_id": "link_1:drawer",
+        "obb_max_edge_m": 0.73649,
+        "tier": "micro",
+        "n_points": 1220,
+        "point_cloud_ratio": 0.428371
+      },
+      {
+        "instance_id": "40147",
+        "part_id": "link_2:furniture_body",
+        "obb_max_edge_m": 1.436636,
+        "tier": "macro",
+        "n_points": 592,
+        "point_cloud_ratio": 0.207865
+      }
+    ]
+  },
+  {
+    "instance_id": "41003",
+    "category": "StorageFurniture",
+    "split": "unassigned",
+    "parts": [
+      {
+        "instance_id": "41003",
+        "part_id": "link_0:rotation_door",
+        "obb_max_edge_m": 1.080898,
+        "tier": "micro",
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
+      },
+      {
+        "instance_id": "41003",
         "part_id": "link_1:rotation_door",
-        "obb_max_edge_m": 1.379207,
+        "obb_max_edge_m": 0.616559,
         "tier": "micro",
-        "n_points": 3312,
-        "point_cloud_ratio": 0.871579
-      }
-    ]
-  },
-  {
-    "instance_id": "45212",
-    "category": "StorageFurniture",
-    "split": "unassigned",
-    "parts": [
-      {
-        "instance_id": "45212",
-        "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.364108,
-        "tier": "micro",
-        "n_points": 564,
-        "point_cloud_ratio": 0.311258
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
       },
       {
-        "instance_id": "45212",
-        "part_id": "link_1:furniture_body",
-        "obb_max_edge_m": 1.583599,
+        "instance_id": "41003",
+        "part_id": "link_2:rotation_door",
+        "obb_max_edge_m": 1.080898,
+        "tier": "micro",
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
+      },
+      {
+        "instance_id": "41003",
+        "part_id": "link_3:rotation_door",
+        "obb_max_edge_m": 0.616559,
+        "tier": "micro",
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
+      },
+      {
+        "instance_id": "41003",
+        "part_id": "link_4:furniture_body",
+        "obb_max_edge_m": 1.702577,
         "tier": "macro",
-        "n_points": 1248,
-        "point_cloud_ratio": 0.688742
+        "n_points": 576,
+        "point_cloud_ratio": 0.391304
       }
     ]
   },
@@ -1964,25 +1996,25 @@
     ]
   },
   {
-    "instance_id": "45690",
+    "instance_id": "38516",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "45690",
+        "instance_id": "38516",
         "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.390689,
+        "obb_max_edge_m": 1.608077,
         "tier": "micro",
-        "n_points": 3432,
-        "point_cloud_ratio": 0.733333
+        "n_points": 858,
+        "point_cloud_ratio": 0.622642
       },
       {
-        "instance_id": "45690",
+        "instance_id": "38516",
         "part_id": "link_1:furniture_body",
-        "obb_max_edge_m": 1.615775,
+        "obb_max_edge_m": 1.676021,
         "tier": "macro",
-        "n_points": 1248,
-        "point_cloud_ratio": 0.266667
+        "n_points": 520,
+        "point_cloud_ratio": 0.377358
       }
     ]
   },
@@ -2258,25 +2290,49 @@
     ]
   },
   {
-    "instance_id": "45961",
+    "instance_id": "41085",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "45961",
+        "instance_id": "41085",
         "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.362187,
+        "obb_max_edge_m": 0.924144,
         "tier": "micro",
-        "n_points": 1036,
-        "point_cloud_ratio": 0.662404
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
       },
       {
-        "instance_id": "45961",
-        "part_id": "link_1:furniture_body",
-        "obb_max_edge_m": 1.586345,
+        "instance_id": "41085",
+        "part_id": "link_1:rotation_door",
+        "obb_max_edge_m": 0.769695,
+        "tier": "micro",
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
+      },
+      {
+        "instance_id": "41085",
+        "part_id": "link_2:rotation_door",
+        "obb_max_edge_m": 0.924144,
+        "tier": "micro",
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
+      },
+      {
+        "instance_id": "41085",
+        "part_id": "link_3:rotation_door",
+        "obb_max_edge_m": 0.769695,
+        "tier": "micro",
+        "n_points": 224,
+        "point_cloud_ratio": 0.152174
+      },
+      {
+        "instance_id": "41085",
+        "part_id": "link_4:furniture_body",
+        "obb_max_edge_m": 1.698947,
         "tier": "macro",
-        "n_points": 528,
-        "point_cloud_ratio": 0.337596
+        "n_points": 576,
+        "point_cloud_ratio": 0.391304
       }
     ]
   },
@@ -2390,105 +2446,25 @@
     ]
   },
   {
-    "instance_id": "46172",
+    "instance_id": "41452",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "46172",
-        "part_id": "link_0:furniture_body",
-        "obb_max_edge_m": 1.687749,
+        "instance_id": "41452",
+        "part_id": "link_0:rotation_door",
+        "obb_max_edge_m": 1.621566,
+        "tier": "micro",
+        "n_points": 248,
+        "point_cloud_ratio": 0.333333
+      },
+      {
+        "instance_id": "41452",
+        "part_id": "link_1:furniture_body",
+        "obb_max_edge_m": 1.636174,
         "tier": "macro",
-        "n_points": 2272,
-        "point_cloud_ratio": 0.340528
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_1:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_2:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_3:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_4:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_5:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_6:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_7:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_8:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_9:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_10:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "meso",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
-      },
-      {
-        "instance_id": "46172",
-        "part_id": "link_11:drawer",
-        "obb_max_edge_m": 0.888449,
-        "tier": "micro",
-        "n_points": 400,
-        "point_cloud_ratio": 0.059952
+        "n_points": 496,
+        "point_cloud_ratio": 0.666667
       }
     ]
   },
@@ -2695,48 +2671,64 @@
     ]
   },
   {
-    "instance_id": "46889",
+    "instance_id": "41510",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "46889",
+        "instance_id": "41510",
         "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.749461,
+        "obb_max_edge_m": 0.985017,
         "tier": "micro",
-        "n_points": 192,
-        "point_cloud_ratio": 0.235294
+        "n_points": 530,
+        "point_cloud_ratio": 0.265265
       },
       {
-        "instance_id": "46889",
-        "part_id": "link_1:furniture_body",
-        "obb_max_edge_m": 1.766638,
+        "instance_id": "41510",
+        "part_id": "link_1:drawer",
+        "obb_max_edge_m": 0.97737,
+        "tier": "meso",
+        "n_points": 652,
+        "point_cloud_ratio": 0.326326
+      },
+      {
+        "instance_id": "41510",
+        "part_id": "link_2:furniture_body",
+        "obb_max_edge_m": 1.531632,
         "tier": "macro",
-        "n_points": 624,
-        "point_cloud_ratio": 0.764706
+        "n_points": 816,
+        "point_cloud_ratio": 0.408408
       }
     ]
   },
   {
-    "instance_id": "46906",
+    "instance_id": "45001",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "46906",
-        "part_id": "link_0:furniture_body",
-        "obb_max_edge_m": 1.858754,
-        "tier": "macro",
+        "instance_id": "45001",
+        "part_id": "link_0:rotation_door",
+        "obb_max_edge_m": 0.737353,
+        "tier": "micro",
         "n_points": 520,
-        "point_cloud_ratio": 0.093931
+        "point_cloud_ratio": 0.261044
       },
       {
-        "instance_id": "46906",
+        "instance_id": "45001",
         "part_id": "link_1:rotation_door",
-        "obb_max_edge_m": 1.770255,
+        "obb_max_edge_m": 0.737353,
         "tier": "micro",
-        "n_points": 5016,
-        "point_cloud_ratio": 0.906069
+        "n_points": 520,
+        "point_cloud_ratio": 0.261044
+      },
+      {
+        "instance_id": "45001",
+        "part_id": "link_2:furniture_body",
+        "obb_max_edge_m": 1.39578,
+        "tier": "macro",
+        "n_points": 952,
+        "point_cloud_ratio": 0.477912
       }
     ]
   },
@@ -2819,33 +2811,25 @@
     ]
   },
   {
-    "instance_id": "47577",
+    "instance_id": "45007",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "47577",
-        "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.118918,
-        "tier": "micro",
-        "n_points": 224,
-        "point_cloud_ratio": 0.21875
-      },
-      {
-        "instance_id": "47577",
-        "part_id": "link_1:rotation_door",
-        "obb_max_edge_m": 0.744915,
-        "tier": "micro",
-        "n_points": 224,
-        "point_cloud_ratio": 0.21875
-      },
-      {
-        "instance_id": "47577",
-        "part_id": "link_2:furniture_body",
-        "obb_max_edge_m": 1.870017,
+        "instance_id": "45007",
+        "part_id": "link_0:furniture_body",
+        "obb_max_edge_m": 1.405703,
         "tier": "macro",
-        "n_points": 576,
-        "point_cloud_ratio": 0.5625
+        "n_points": 488,
+        "point_cloud_ratio": 0.088663
+      },
+      {
+        "instance_id": "45007",
+        "part_id": "link_1:rotation_door",
+        "obb_max_edge_m": 1.311995,
+        "tier": "micro",
+        "n_points": 5016,
+        "point_cloud_ratio": 0.911337
       }
     ]
   },
@@ -3151,41 +3135,25 @@
     ]
   },
   {
-    "instance_id": "48797",
+    "instance_id": "45091",
     "category": "StorageFurniture",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "48797",
-        "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 0.500668,
-        "tier": "micro",
-        "n_points": 224,
-        "point_cloud_ratio": 0.17284
-      },
-      {
-        "instance_id": "48797",
-        "part_id": "link_1:rotation_door",
-        "obb_max_edge_m": 0.789961,
-        "tier": "micro",
-        "n_points": 224,
-        "point_cloud_ratio": 0.17284
-      },
-      {
-        "instance_id": "48797",
-        "part_id": "link_2:rotation_door",
-        "obb_max_edge_m": 0.631445,
-        "tier": "micro",
-        "n_points": 224,
-        "point_cloud_ratio": 0.17284
-      },
-      {
-        "instance_id": "48797",
-        "part_id": "link_3:furniture_body",
-        "obb_max_edge_m": 1.902198,
+        "instance_id": "45091",
+        "part_id": "link_0:furniture_body",
+        "obb_max_edge_m": 1.535454,
         "tier": "macro",
-        "n_points": 624,
-        "point_cloud_ratio": 0.481481
+        "n_points": 512,
+        "point_cloud_ratio": 0.330749
+      },
+      {
+        "instance_id": "45091",
+        "part_id": "link_1:rotation_door",
+        "obb_max_edge_m": 1.51946,
+        "tier": "micro",
+        "n_points": 1036,
+        "point_cloud_ratio": 0.669251
       }
     ]
   },
@@ -3647,25 +3615,41 @@
     ]
   },
   {
-    "instance_id": "100914",
+    "instance_id": "100846",
     "category": "Switch",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "100914",
+        "instance_id": "100846",
         "part_id": "link_0:toggle_button",
-        "obb_max_edge_m": 0.608006,
+        "obb_max_edge_m": 0.320593,
         "tier": "micro",
-        "n_points": 390,
-        "point_cloud_ratio": 0.083565
+        "n_points": 240,
+        "point_cloud_ratio": 0.131148
       },
       {
-        "instance_id": "100914",
-        "part_id": "link_1:switch_frame",
-        "obb_max_edge_m": 1.460718,
+        "instance_id": "100846",
+        "part_id": "link_1:toggle_button",
+        "obb_max_edge_m": 0.320593,
+        "tier": "micro",
+        "n_points": 240,
+        "point_cloud_ratio": 0.131148
+      },
+      {
+        "instance_id": "100846",
+        "part_id": "link_2:toggle_button",
+        "obb_max_edge_m": 0.320593,
+        "tier": "micro",
+        "n_points": 240,
+        "point_cloud_ratio": 0.131148
+      },
+      {
+        "instance_id": "100846",
+        "part_id": "link_3:switch_frame",
+        "obb_max_edge_m": 1.840894,
         "tier": "macro",
-        "n_points": 4277,
-        "point_cloud_ratio": 0.916435
+        "n_points": 1110,
+        "point_cloud_ratio": 0.606557
       }
     ]
   },
@@ -4010,25 +3994,33 @@
     ]
   },
   {
-    "instance_id": "100970",
+    "instance_id": "100848",
     "category": "Switch",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "100970",
-        "part_id": "link_0:slider",
-        "obb_max_edge_m": 0.398564,
+        "instance_id": "100848",
+        "part_id": "link_0:toggle_button",
+        "obb_max_edge_m": 0.343486,
         "tier": "micro",
-        "n_points": 102,
-        "point_cloud_ratio": 0.046961
+        "n_points": 64,
+        "point_cloud_ratio": 0.110345
       },
       {
-        "instance_id": "100970",
-        "part_id": "link_1:switch_frame",
-        "obb_max_edge_m": 1.795905,
+        "instance_id": "100848",
+        "part_id": "link_1:toggle_button",
+        "obb_max_edge_m": 0.343486,
+        "tier": "micro",
+        "n_points": 64,
+        "point_cloud_ratio": 0.110345
+      },
+      {
+        "instance_id": "100848",
+        "part_id": "link_2:switch_frame",
+        "obb_max_edge_m": 1.740729,
         "tier": "macro",
-        "n_points": 2070,
-        "point_cloud_ratio": 0.953039
+        "n_points": 452,
+        "point_cloud_ratio": 0.77931
       }
     ]
   },
@@ -4806,112 +4798,120 @@
     ]
   },
   {
-    "instance_id": "103030",
+    "instance_id": "103037",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103030",
+        "instance_id": "103037",
         "part_id": "link_0:knob",
-        "obb_max_edge_m": 0.240182,
+        "obb_max_edge_m": 0.112723,
         "tier": "micro",
-        "n_points": 80,
-        "point_cloud_ratio": 0.027548
+        "n_points": 1060,
+        "point_cloud_ratio": 0.008843
       },
       {
-        "instance_id": "103030",
-        "part_id": "link_1:container",
-        "obb_max_edge_m": 1.071905,
-        "tier": "meso",
-        "n_points": 1821,
-        "point_cloud_ratio": 0.627066
-      },
-      {
-        "instance_id": "103030",
-        "part_id": "link_2:lid",
-        "obb_max_edge_m": 0.903767,
+        "instance_id": "103037",
+        "part_id": "link_1:button",
+        "obb_max_edge_m": 0.031141,
         "tier": "micro",
-        "n_points": 238,
-        "point_cloud_ratio": 0.081956
+        "n_points": 1518,
+        "point_cloud_ratio": 0.012664
       },
       {
-        "instance_id": "103030",
-        "part_id": "link_3:coffee_machine_body",
-        "obb_max_edge_m": 1.172428,
-        "tier": "meso",
-        "n_points": 765,
-        "point_cloud_ratio": 0.26343
+        "instance_id": "103037",
+        "part_id": "link_2:button",
+        "obb_max_edge_m": 0.031211,
+        "tier": "micro",
+        "n_points": 1518,
+        "point_cloud_ratio": 0.012664
+      },
+      {
+        "instance_id": "103037",
+        "part_id": "link_3:button",
+        "obb_max_edge_m": 0.044135,
+        "tier": "micro",
+        "n_points": 1530,
+        "point_cloud_ratio": 0.012764
+      },
+      {
+        "instance_id": "103037",
+        "part_id": "link_4:button",
+        "obb_max_edge_m": 0.044136,
+        "tier": "micro",
+        "n_points": 1532,
+        "point_cloud_ratio": 0.012781
+      },
+      {
+        "instance_id": "103037",
+        "part_id": "link_5:coffee_machine_body",
+        "obb_max_edge_m": 1.459729,
+        "tier": "macro",
+        "n_points": 112706,
+        "point_cloud_ratio": 0.940282
       }
     ]
   },
   {
-    "instance_id": "103031",
+    "instance_id": "103041",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103031",
-        "part_id": "link_0:rotation_lid",
-        "obb_max_edge_m": 0.87922,
-        "tier": "meso",
-        "n_points": 2510,
-        "point_cloud_ratio": 0.053665
-      },
-      {
-        "instance_id": "103031",
-        "part_id": "link_1:rotation_container",
-        "obb_max_edge_m": 0.895302,
-        "tier": "meso",
-        "n_points": 1657,
-        "point_cloud_ratio": 0.035427
-      },
-      {
-        "instance_id": "103031",
-        "part_id": "link_2:rotor",
-        "obb_max_edge_m": 0.513717,
+        "instance_id": "103041",
+        "part_id": "link_0:knob",
+        "obb_max_edge_m": 0.189578,
         "tier": "micro",
-        "n_points": 1388,
-        "point_cloud_ratio": 0.029676
+        "n_points": 972,
+        "point_cloud_ratio": 0.091689
       },
       {
-        "instance_id": "103031",
-        "part_id": "link_3:knob",
-        "obb_max_edge_m": 0.07849,
+        "instance_id": "103041",
+        "part_id": "link_1:container",
+        "obb_max_edge_m": 0.824317,
         "tier": "micro",
-        "n_points": 527,
-        "point_cloud_ratio": 0.011267
+        "n_points": 608,
+        "point_cloud_ratio": 0.057353
       },
       {
-        "instance_id": "103031",
-        "part_id": "link_4:wheel",
-        "obb_max_edge_m": 0.207697,
+        "instance_id": "103041",
+        "part_id": "link_2:lid",
+        "obb_max_edge_m": 0.707962,
         "tier": "micro",
-        "n_points": 390,
-        "point_cloud_ratio": 0.008338
+        "n_points": 240,
+        "point_cloud_ratio": 0.022639
       },
       {
-        "instance_id": "103031",
-        "part_id": "link_5:wheel",
-        "obb_max_edge_m": 0.158889,
+        "instance_id": "103041",
+        "part_id": "link_3:button",
+        "obb_max_edge_m": 0.053737,
         "tier": "micro",
-        "n_points": 390,
-        "point_cloud_ratio": 0.008338
+        "n_points": 144,
+        "point_cloud_ratio": 0.013584
       },
       {
-        "instance_id": "103031",
-        "part_id": "link_6:wheel",
-        "obb_max_edge_m": 0.158889,
+        "instance_id": "103041",
+        "part_id": "link_4:knob",
+        "obb_max_edge_m": 0.143109,
         "tier": "micro",
-        "n_points": 390,
-        "point_cloud_ratio": 0.008338
+        "n_points": 104,
+        "point_cloud_ratio": 0.00981
       },
       {
-        "instance_id": "103031",
-        "part_id": "link_7:coffee_machine_body",
-        "obb_max_edge_m": 1.333206,
+        "instance_id": "103041",
+        "part_id": "link_5:knob",
+        "obb_max_edge_m": 0.166653,
+        "tier": "micro",
+        "n_points": 144,
+        "point_cloud_ratio": 0.013584
+      },
+      {
+        "instance_id": "103041",
+        "part_id": "link_6:coffee_machine_body",
+        "obb_max_edge_m": 1.649345,
         "tier": "macro",
-        "n_points": 39520,
-        "point_cloud_ratio": 0.84495
+        "n_points": 8389,
+        "point_cloud_ratio": 0.79134
       }
     ]
   },
@@ -5279,41 +5279,97 @@
     ]
   },
   {
-    "instance_id": "103062",
+    "instance_id": "103121",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103062",
-        "part_id": "link_0:knob",
-        "obb_max_edge_m": 0.19263,
+        "instance_id": "103121",
+        "part_id": "link_0:button",
+        "obb_max_edge_m": 0.028575,
         "tier": "micro",
-        "n_points": 1980,
-        "point_cloud_ratio": 0.074152
+        "n_points": 144,
+        "point_cloud_ratio": 0.025357
       },
       {
-        "instance_id": "103062",
-        "part_id": "link_1:container",
-        "obb_max_edge_m": 1.069402,
-        "tier": "meso",
-        "n_points": 4163,
-        "point_cloud_ratio": 0.155906
-      },
-      {
-        "instance_id": "103062",
-        "part_id": "link_2:lid",
-        "obb_max_edge_m": 0.867114,
+        "instance_id": "103121",
+        "part_id": "link_1:button",
+        "obb_max_edge_m": 0.028575,
         "tier": "micro",
-        "n_points": 3724,
-        "point_cloud_ratio": 0.139465
+        "n_points": 144,
+        "point_cloud_ratio": 0.025357
       },
       {
-        "instance_id": "103062",
-        "part_id": "link_3:coffee_machine_body",
-        "obb_max_edge_m": 1.845165,
+        "instance_id": "103121",
+        "part_id": "link_2:button",
+        "obb_max_edge_m": 0.028575,
+        "tier": "micro",
+        "n_points": 144,
+        "point_cloud_ratio": 0.025357
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_3:button",
+        "obb_max_edge_m": 0.028575,
+        "tier": "micro",
+        "n_points": 144,
+        "point_cloud_ratio": 0.025357
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_4:button",
+        "obb_max_edge_m": 0.021587,
+        "tier": "micro",
+        "n_points": 64,
+        "point_cloud_ratio": 0.01127
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_5:knob",
+        "obb_max_edge_m": 0.048022,
+        "tier": "micro",
+        "n_points": 80,
+        "point_cloud_ratio": 0.014087
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_6:knob",
+        "obb_max_edge_m": 0.048022,
+        "tier": "micro",
+        "n_points": 80,
+        "point_cloud_ratio": 0.014087
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_7:button",
+        "obb_max_edge_m": 0.021587,
+        "tier": "micro",
+        "n_points": 64,
+        "point_cloud_ratio": 0.01127
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_8:button",
+        "obb_max_edge_m": 0.021587,
+        "tier": "micro",
+        "n_points": 64,
+        "point_cloud_ratio": 0.01127
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_9:button",
+        "obb_max_edge_m": 0.021587,
+        "tier": "micro",
+        "n_points": 64,
+        "point_cloud_ratio": 0.01127
+      },
+      {
+        "instance_id": "103121",
+        "part_id": "link_10:coffee_machine_body",
+        "obb_max_edge_m": 1.273607,
         "tier": "macro",
-        "n_points": 16835,
-        "point_cloud_ratio": 0.630477
+        "n_points": 4687,
+        "point_cloud_ratio": 0.825321
       }
     ]
   },
@@ -5539,41 +5595,33 @@
     ]
   },
   {
-    "instance_id": "103074",
+    "instance_id": "103065",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103074",
-        "part_id": "link_0:lever",
-        "obb_max_edge_m": 0.13998,
+        "instance_id": "103065",
+        "part_id": "link_0:button",
+        "obb_max_edge_m": 0.088035,
         "tier": "micro",
-        "n_points": 1324,
-        "point_cloud_ratio": 0.113317
+        "n_points": 2388,
+        "point_cloud_ratio": 0.047551
       },
       {
-        "instance_id": "103074",
-        "part_id": "link_1:knob",
-        "obb_max_edge_m": 0.07178,
+        "instance_id": "103065",
+        "part_id": "link_1:lid",
+        "obb_max_edge_m": 0.523836,
         "tier": "micro",
-        "n_points": 438,
-        "point_cloud_ratio": 0.037487
+        "n_points": 2116,
+        "point_cloud_ratio": 0.042135
       },
       {
-        "instance_id": "103074",
-        "part_id": "link_2:knob",
-        "obb_max_edge_m": 0.073696,
-        "tier": "micro",
-        "n_points": 438,
-        "point_cloud_ratio": 0.037487
-      },
-      {
-        "instance_id": "103074",
-        "part_id": "link_3:coffee_machine_body",
-        "obb_max_edge_m": 1.491199,
+        "instance_id": "103065",
+        "part_id": "link_2:coffee_machine_body",
+        "obb_max_edge_m": 1.371622,
         "tier": "macro",
-        "n_points": 9484,
-        "point_cloud_ratio": 0.811708
+        "n_points": 45716,
+        "point_cloud_ratio": 0.910315
       }
     ]
   },
@@ -5907,41 +5955,97 @@
     ]
   },
   {
-    "instance_id": "103105",
+    "instance_id": "103069",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103105",
-        "part_id": "link_0:container",
-        "obb_max_edge_m": 0.983371,
-        "tier": "meso",
-        "n_points": 2064,
-        "point_cloud_ratio": 0.562704
-      },
-      {
-        "instance_id": "103105",
-        "part_id": "link_1:lid",
-        "obb_max_edge_m": 0.832923,
+        "instance_id": "103069",
+        "part_id": "link_0:button",
+        "obb_max_edge_m": 0.084853,
         "tier": "micro",
-        "n_points": 438,
-        "point_cloud_ratio": 0.119411
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
       },
       {
-        "instance_id": "103105",
-        "part_id": "link_2:knob",
-        "obb_max_edge_m": 0.268278,
+        "instance_id": "103069",
+        "part_id": "link_1:button",
+        "obb_max_edge_m": 0.084853,
         "tier": "micro",
-        "n_points": 224,
-        "point_cloud_ratio": 0.061069
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
       },
       {
-        "instance_id": "103105",
-        "part_id": "link_3:coffee_machine_body",
-        "obb_max_edge_m": 1.076908,
+        "instance_id": "103069",
+        "part_id": "link_2:button",
+        "obb_max_edge_m": 0.084853,
+        "tier": "micro",
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_3:button",
+        "obb_max_edge_m": 0.084853,
+        "tier": "micro",
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_4:button",
+        "obb_max_edge_m": 0.133061,
+        "tier": "micro",
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_5:button",
+        "obb_max_edge_m": 0.13306,
+        "tier": "micro",
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_6:button",
+        "obb_max_edge_m": 0.13306,
+        "tier": "micro",
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_7:button",
+        "obb_max_edge_m": 0.084853,
+        "tier": "micro",
+        "n_points": 20,
+        "point_cloud_ratio": 0.002279
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_8:container",
+        "obb_max_edge_m": 1.086844,
+        "tier": "macro",
+        "n_points": 4804,
+        "point_cloud_ratio": 0.547464
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_9:lid",
+        "obb_max_edge_m": 0.939178,
+        "tier": "micro",
+        "n_points": 2948,
+        "point_cloud_ratio": 0.335954
+      },
+      {
+        "instance_id": "103069",
+        "part_id": "link_10:coffee_machine_body",
+        "obb_max_edge_m": 0.80296,
         "tier": "meso",
-        "n_points": 942,
-        "point_cloud_ratio": 0.256816
+        "n_points": 863,
+        "point_cloud_ratio": 0.098348
       }
     ]
   },
@@ -6483,136 +6587,112 @@
     ]
   },
   {
-    "instance_id": "103129",
+    "instance_id": "103072",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103129",
-        "part_id": "link_0:button",
-        "obb_max_edge_m": 0.056236,
+        "instance_id": "103072",
+        "part_id": "link_0:container",
+        "obb_max_edge_m": 1.03215,
         "tier": "micro",
-        "n_points": 24,
-        "point_cloud_ratio": 0.002233
+        "n_points": 1778,
+        "point_cloud_ratio": 0.033067
       },
       {
-        "instance_id": "103129",
-        "part_id": "link_1:knob",
-        "obb_max_edge_m": 0.137389,
+        "instance_id": "103072",
+        "part_id": "link_1:lid",
+        "obb_max_edge_m": 0.554359,
         "tier": "micro",
-        "n_points": 319,
-        "point_cloud_ratio": 0.029685
+        "n_points": 576,
+        "point_cloud_ratio": 0.010712
       },
       {
-        "instance_id": "103129",
-        "part_id": "link_2:container",
-        "obb_max_edge_m": 1.0914,
-        "tier": "meso",
-        "n_points": 1982,
-        "point_cloud_ratio": 0.184441
-      },
-      {
-        "instance_id": "103129",
-        "part_id": "link_3:lid",
-        "obb_max_edge_m": 0.635187,
+        "instance_id": "103072",
+        "part_id": "link_2:button",
+        "obb_max_edge_m": 0.065218,
         "tier": "micro",
-        "n_points": 1752,
-        "point_cloud_ratio": 0.163037
+        "n_points": 302,
+        "point_cloud_ratio": 0.005617
       },
       {
-        "instance_id": "103129",
-        "part_id": "link_4:coffee_machine_body",
-        "obb_max_edge_m": 1.043399,
-        "tier": "meso",
-        "n_points": 6669,
-        "point_cloud_ratio": 0.620603
+        "instance_id": "103072",
+        "part_id": "link_3:button",
+        "obb_max_edge_m": 0.065218,
+        "tier": "micro",
+        "n_points": 302,
+        "point_cloud_ratio": 0.005617
+      },
+      {
+        "instance_id": "103072",
+        "part_id": "link_4:button",
+        "obb_max_edge_m": 0.065218,
+        "tier": "micro",
+        "n_points": 302,
+        "point_cloud_ratio": 0.005617
+      },
+      {
+        "instance_id": "103072",
+        "part_id": "link_5:slider",
+        "obb_max_edge_m": 0.058167,
+        "tier": "micro",
+        "n_points": 25312,
+        "point_cloud_ratio": 0.470746
+      },
+      {
+        "instance_id": "103072",
+        "part_id": "link_6:coffee_machine_body",
+        "obb_max_edge_m": 1.759348,
+        "tier": "macro",
+        "n_points": 25198,
+        "point_cloud_ratio": 0.468626
       }
     ]
   },
   {
-    "instance_id": "103134",
+    "instance_id": "103127",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103134",
+        "instance_id": "103127",
         "part_id": "link_0:button",
-        "obb_max_edge_m": 0.190817,
+        "obb_max_edge_m": 0.083945,
         "tier": "micro",
-        "n_points": 2098,
-        "point_cloud_ratio": 0.028154
+        "n_points": 2476,
+        "point_cloud_ratio": 0.1278
       },
       {
-        "instance_id": "103134",
+        "instance_id": "103127",
         "part_id": "link_1:button",
-        "obb_max_edge_m": 0.182627,
+        "obb_max_edge_m": 0.090741,
         "tier": "micro",
-        "n_points": 1972,
-        "point_cloud_ratio": 0.026463
+        "n_points": 2864,
+        "point_cloud_ratio": 0.147827
       },
       {
-        "instance_id": "103134",
+        "instance_id": "103127",
         "part_id": "link_2:button",
-        "obb_max_edge_m": 0.066335,
+        "obb_max_edge_m": 0.038703,
         "tier": "micro",
-        "n_points": 372,
-        "point_cloud_ratio": 0.004992
+        "n_points": 96,
+        "point_cloud_ratio": 0.004955
       },
       {
-        "instance_id": "103134",
+        "instance_id": "103127",
         "part_id": "link_3:button",
-        "obb_max_edge_m": 0.066336,
+        "obb_max_edge_m": 0.038703,
         "tier": "micro",
-        "n_points": 372,
-        "point_cloud_ratio": 0.004992
+        "n_points": 96,
+        "point_cloud_ratio": 0.004955
       },
       {
-        "instance_id": "103134",
-        "part_id": "link_4:button",
-        "obb_max_edge_m": 0.066335,
-        "tier": "micro",
-        "n_points": 372,
-        "point_cloud_ratio": 0.004992
-      },
-      {
-        "instance_id": "103134",
-        "part_id": "link_5:button",
-        "obb_max_edge_m": 0.066335,
-        "tier": "micro",
-        "n_points": 372,
-        "point_cloud_ratio": 0.004992
-      },
-      {
-        "instance_id": "103134",
-        "part_id": "link_6:button",
-        "obb_max_edge_m": 0.066336,
-        "tier": "micro",
-        "n_points": 372,
-        "point_cloud_ratio": 0.004992
-      },
-      {
-        "instance_id": "103134",
-        "part_id": "link_7:container",
-        "obb_max_edge_m": 1.432133,
+        "instance_id": "103127",
+        "part_id": "link_4:coffee_machine_body",
+        "obb_max_edge_m": 1.470787,
         "tier": "macro",
-        "n_points": 5412,
-        "point_cloud_ratio": 0.072627
-      },
-      {
-        "instance_id": "103134",
-        "part_id": "link_8:lid",
-        "obb_max_edge_m": 1.299241,
-        "tier": "micro",
-        "n_points": 5802,
-        "point_cloud_ratio": 0.07786
-      },
-      {
-        "instance_id": "103134",
-        "part_id": "link_9:coffee_machine_body",
-        "obb_max_edge_m": 1.278416,
-        "tier": "meso",
-        "n_points": 57374,
-        "point_cloud_ratio": 0.769935
+        "n_points": 13842,
+        "point_cloud_ratio": 0.714463
       }
     ]
   },
@@ -6870,25 +6950,105 @@
     ]
   },
   {
-    "instance_id": "103146",
+    "instance_id": "103084",
     "category": "CoffeeMachine",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "103146",
-        "part_id": "link_0:lid",
-        "obb_max_edge_m": 0.693835,
+        "instance_id": "103084",
+        "part_id": "link_0:button",
+        "obb_max_edge_m": 0.048003,
         "tier": "micro",
-        "n_points": 420,
-        "point_cloud_ratio": 0.046063
+        "n_points": 167,
+        "point_cloud_ratio": 0.007766
       },
       {
-        "instance_id": "103146",
-        "part_id": "link_1:coffee_machine_body",
-        "obb_max_edge_m": 1.493728,
+        "instance_id": "103084",
+        "part_id": "link_1:knob",
+        "obb_max_edge_m": 0.107985,
+        "tier": "micro",
+        "n_points": 146,
+        "point_cloud_ratio": 0.006789
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_2:knob",
+        "obb_max_edge_m": 0.107986,
+        "tier": "micro",
+        "n_points": 146,
+        "point_cloud_ratio": 0.006789
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_3:knob",
+        "obb_max_edge_m": 0.081379,
+        "tier": "micro",
+        "n_points": 150,
+        "point_cloud_ratio": 0.006975
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_4:knob",
+        "obb_max_edge_m": 0.084692,
+        "tier": "micro",
+        "n_points": 155,
+        "point_cloud_ratio": 0.007208
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_5:button",
+        "obb_max_edge_m": 0.048006,
+        "tier": "micro",
+        "n_points": 164,
+        "point_cloud_ratio": 0.007626
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_6:knob",
+        "obb_max_edge_m": 0.086413,
+        "tier": "micro",
+        "n_points": 148,
+        "point_cloud_ratio": 0.006882
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_7:knob",
+        "obb_max_edge_m": 0.100805,
+        "tier": "micro",
+        "n_points": 165,
+        "point_cloud_ratio": 0.007673
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_8:knob",
+        "obb_max_edge_m": 0.3846,
+        "tier": "micro",
+        "n_points": 240,
+        "point_cloud_ratio": 0.01116
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_9:portafilter",
+        "obb_max_edge_m": 0.881741,
+        "tier": "micro",
+        "n_points": 2712,
+        "point_cloud_ratio": 0.12611
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_10:lever",
+        "obb_max_edge_m": 0.428181,
+        "tier": "micro",
+        "n_points": 3356,
+        "point_cloud_ratio": 0.156057
+      },
+      {
+        "instance_id": "103084",
+        "part_id": "link_11:coffee_machine_body",
+        "obb_max_edge_m": 1.449279,
         "tier": "macro",
-        "n_points": 8698,
-        "point_cloud_ratio": 0.953937
+        "n_points": 13956,
+        "point_cloud_ratio": 0.648965
       }
     ]
   },
@@ -7101,25 +7261,41 @@
     ]
   },
   {
-    "instance_id": "12540",
+    "instance_id": "11826",
     "category": "Dishwasher",
     "split": "unassigned",
     "parts": [
       {
-        "instance_id": "12540",
-        "part_id": "link_0:rotation_door",
-        "obb_max_edge_m": 1.302657,
+        "instance_id": "11826",
+        "part_id": "link_0:shelf",
+        "obb_max_edge_m": 0.836391,
         "tier": "micro",
-        "n_points": 16206,
-        "point_cloud_ratio": 0.751565
+        "n_points": 10830,
+        "point_cloud_ratio": 0.24354
       },
       {
-        "instance_id": "12540",
-        "part_id": "link_1:dishwasher_body",
-        "obb_max_edge_m": 1.491973,
+        "instance_id": "11826",
+        "part_id": "link_1:shelf",
+        "obb_max_edge_m": 0.845143,
+        "tier": "meso",
+        "n_points": 21238,
+        "point_cloud_ratio": 0.477591
+      },
+      {
+        "instance_id": "11826",
+        "part_id": "link_2:rotation_door",
+        "obb_max_edge_m": 1.257926,
+        "tier": "meso",
+        "n_points": 2007,
+        "point_cloud_ratio": 0.045133
+      },
+      {
+        "instance_id": "11826",
+        "part_id": "link_3:dishwasher_body",
+        "obb_max_edge_m": 1.468392,
         "tier": "macro",
-        "n_points": 5357,
-        "point_cloud_ratio": 0.248435
+        "n_points": 10394,
+        "point_cloud_ratio": 0.233736
       }
     ]
   },
