@@ -1,0 +1,77 @@
+{
+  "processed": 200,
+  "written": 200,
+  "skipped_existing": 0,
+  "missing_npz": [],
+  "failed": [],
+  "status_counts": {
+    "semantic": 1354,
+    "exact": 295,
+    "static_or_unmapped": 170
+  },
+  "by_category": {
+    "Faucet": {
+      "processed": 47,
+      "written": 47,
+      "status_counts": {
+        "semantic": 351
+      },
+      "raw_mean_sum": 23.040320992469788,
+      "exec_mean_sum": 2.8519542180001736,
+      "raw_mean": 0.49021959558446354,
+      "exec_mean": 0.0606798769787271
+    },
+    "StorageFurniture": {
+      "processed": 60,
+      "written": 60,
+      "status_counts": {
+        "semantic": 415,
+        "exact": 107
+      },
+      "raw_mean_sum": 32.33716857433319,
+      "exec_mean_sum": 2.4459903305687476,
+      "raw_mean": 0.5389528095722198,
+      "exec_mean": 0.04076650550947913
+    },
+    "Switch": {
+      "processed": 40,
+      "written": 40,
+      "status_counts": {
+        "semantic": 235,
+        "static_or_unmapped": 170,
+        "exact": 29
+      },
+      "raw_mean_sum": 11.555597931146622,
+      "exec_mean_sum": 0.8529572375264252,
+      "raw_mean": 0.28888994827866554,
+      "exec_mean": 0.02132393093816063
+    },
+    "CoffeeMachine": {
+      "processed": 40,
+      "written": 40,
+      "status_counts": {
+        "semantic": 286,
+        "exact": 159
+      },
+      "raw_mean_sum": 20.24886327981949,
+      "exec_mean_sum": 1.5810633008368313,
+      "raw_mean": 0.5062215819954872,
+      "exec_mean": 0.03952658252092078
+    },
+    "Dishwasher": {
+      "processed": 13,
+      "written": 13,
+      "status_counts": {
+        "semantic": 67
+      },
+      "raw_mean_sum": 6.8911784291267395,
+      "exec_mean_sum": 0.664962693117559,
+      "raw_mean": 0.5300906483943646,
+      "exec_mean": 0.051150976393658384
+    }
+  },
+  "raw_mean_sum": 94.07312920689583,
+  "exec_mean_sum": 8.396927780049737,
+  "raw_mean": 0.47036564603447917,
+  "exec_mean": 0.041984638900248686
+}
