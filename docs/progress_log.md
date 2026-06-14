@@ -1755,3 +1755,235 @@ PPT 答辩时可拿来当 Slide 14-19 的更新素材，对比 M_full vs M1_comp
 
 **失败模式洞察**: M1/M2/M_full 失败几乎全集中在 low_confidence（BCE 压低典型现象），
 M1_composite 失败分布多元化 → Composite Loss 改变模型失败模式，是个有意义的 trade-off。
+
+---
+
+## 2026-06-14 全天纪要 + 完整产物路径速查表
+
+> 这一节是关镜文 6.14 一整天工作的总账，所有产物路径一次性列清。
+> 远程 gjw 分支顶部 commit：`48601df`（.gitignore 收尾）→ 上一个 commit `63b1923`（主要产物 commit）
+
+### 一、全天时间线（早→晚）
+
+| 时段 | 任务 | 关键产物 |
+|---|---|---|
+| 上午 | 拉 hyh 6.13 的 200 实例 + 三层标签（卡 LFS 限速）| `data/*.npz` (200 个) |
+| 上午 | part_tiers 重算（98.6% 一致率验证）| `tools/populate_part_tiers_200.py` + 200 个 npz 的 `part_tiers` + `part_tiers_orig` 备份字段 |
+| 上午 | M_full × 3 seed 训练 | `ckpts/m_full_seed{42,43,44}/best.pt` |
+| 上午 | M_full_nocascade × 3 seed 训练（对照实验）| `ckpts/m_full_nocascade_seed{42,43,44}/best.pt` |
+| 上午 | M1 × 3 seed 在 200 实例 baseline | `ckpts/m1_seed{42,43,44}/best.pt`（覆盖 47 实例旧版）|
+| 上午 | Cascade 严谨诊断 6 项新指标 | `eval/metrics.py::cascade_diagnostics()` |
+| 上午 | 3 seed 4 模型 paired t-test 出 narrative | `eval/significance_stage3_p0plus.json` |
+| 下午 | M2 双层补训 × 3 seed（覆盖 hyh 6.13 待办）| `ckpts/m2_seed{42,43,44}/best.pt` |
+| 下午 | 4 模型阶梯 paired t-test | `eval/significance_stage3_p0plus_v2.json` |
+| 下午 | P3-fix：train.py 加 epoch>0 保护，重训 M0×3 | `ckpts/m0_seed{42,43,44}/best.pt`（重训）|
+| 下午 | M1_focal × 3 seed + M1_composite × 3 seed | `ckpts/m1_focal_seed{42,43,44}/best.pt` + `ckpts/m1_composite_seed{42,43,44}/best.pt` |
+| 下午 | 7 模型 × 3 seed 完整消融 paired t-test | `eval/significance_stage3_7model.json` |
+| 下午 | W2A 7 实例交集对照（新写 eval_w2a_overlap.py）| `eval/results_stage3_w2a_overlap_seed{42,43,44}.json` |
+| 下午 | Failure taxonomy 4 模型对比 | `eval/failure_log_*.csv` + `eval/figs/failure_taxonomy_*.png` |
+| 下午 | 极坐标可视化 4 张（M_full + M1_composite × 实例 153 / 100367）| `viz/figs/polar_*_seed42.png` |
+| 下午 | reachability_heatmap 多头 dict 支持修复 | `viz/reachability_heatmap.py` |
+| 晚上 | progress_log 中文化 + 完整章节 | `docs/progress_log.md` |
+| 晚上 | 阶段三 A3 设计要点 md 升级（+3 个 PoV）| `D:\大三下\机器人技术\阶段三_A3_设计要点.md` |
+| 晚上 | .gitignore 扩展 wandb/ + 阶段二遗留 | `.gitignore` |
+| 晚上 | 给 hyh 的进度通知 + 投稿就绪 checklist | 在 `D:\大三下\机器人技术\`（仓库外）|
+
+### 二、Ckpt 完整清单（21 个新训 + 12 个旧训）
+
+**200 实例 P0+ 训练（21 个，6.14 全部产出）**:
+
+| 变体 | seed42 | seed43 | seed44 | epoch / val_loss / val_recall@1 |
+|---|---|---|---|---|
+| M0 | ckpts/m0_seed42/best.pt | ckpts/m0_seed43/best.pt | ckpts/m0_seed44/best.pt | 5/25/55 epoch（重训后）|
+| M1 | ckpts/m1_seed42/best.pt | ckpts/m1_seed43/best.pt | ckpts/m1_seed44/best.pt | 15/15/25 epoch |
+| M1+Focal | ckpts/m1_focal_seed42/best.pt | ckpts/m1_focal_seed43/best.pt | ckpts/m1_focal_seed44/best.pt | 50/15/25 epoch |
+| M1+Composite | ckpts/m1_composite_seed42/best.pt | ckpts/m1_composite_seed43/best.pt | ckpts/m1_composite_seed44/best.pt | 40/15/10 epoch |
+| M2 | ckpts/m2_seed42/best.pt | ckpts/m2_seed43/best.pt | ckpts/m2_seed44/best.pt | 70/50/55 epoch |
+| M_full | ckpts/m_full_seed42/best.pt | ckpts/m_full_seed43/best.pt | ckpts/m_full_seed44/best.pt | 100/50/65 epoch |
+| M_full_nocascade | ckpts/m_full_nocascade_seed42/best.pt | ckpts/m_full_nocascade_seed43/best.pt | ckpts/m_full_nocascade_seed44/best.pt | 50/55 epoch |
+
+每个变体目录下还有 `epoch_{19,39,59,79,99}.pt` 定期 ckpt（130 epoch 的 M_full 多 119/139）。
+
+**47 实例阶段三 A2 训练（保留作中期对照，12 个）**:
+
+| 变体 | seed42 | seed43 | seed44 | seed45 | seed46 |
+|---|---|---|---|---|---|
+| M0 | （已被 200 实例覆盖）|（已被 200 实例覆盖）|（已被 200 实例覆盖）| ckpts/m0_seed45/best.pt | ckpts/m0_seed46/best.pt |
+| M1 系列同上 | 同上 | 同上 | 同上 | m1_*_seed45 | m1_*_seed46 |
+
+→ seed=45/46 的 ckpt 现在评测会得到 200 实例数据上的不同数字（之前是 47 实例训的），所以这些 ckpt 实际是 **47 实例时的训练参数权重，但在 200 实例 test set 上没法 fair 评测**。建议作为"中期 5-seed narrative 历史档案"保留，不再用。
+
+### 三、评测结果 JSON 完整清单
+
+**7 模型 × 3 seed 主结果（论文主表）**:
+
+| 文件 | 内容 | 规模 |
+|---|---|---|
+| `eval/results_stage3_7model_seed42.json` | 7 模型在 20 个 test instance 上 seed=42 评测 | per-instance metrics |
+| `eval/results_stage3_7model_seed43.json` | 同上 seed=43 | per-instance metrics |
+| `eval/results_stage3_7model_seed44.json` | 同上 seed=44 | per-instance metrics |
+| `eval/significance_stage3_7model.json` | **★ 7 模型 × 3 seed paired t-test（baseline=M1）** | mean±std + p-value |
+
+**早期 4 模型 × 3 seed 子结果（保留作对照）**:
+
+| 文件 | 内容 |
+|---|---|
+| `eval/results_stage3_p0plus_seed{42,43,44}.json` | 3 模型 (M1/M_full/M_full_nocascade) × 3 seed |
+| `eval/significance_stage3_p0plus.json` | 3 模型 paired t-test |
+| `eval/results_stage3_p0plus_v2_seed{42,43,44}.json` | 4 模型 (含 M2) × 3 seed |
+| `eval/significance_stage3_p0plus_v2.json` | 4 模型 paired t-test |
+| `eval/results_stage3_mfull_seed42.json` | M_full 独立评测（最早跑 cascade=1.0 那次）|
+| `eval/results_stage3_m1_vs_mfull_seed42.json` | M1 vs M_full 早期对比 |
+
+**Where2Act SOTA 对照（7 个 Faucet 交集实例）**:
+
+| 文件 | 内容 |
+|---|---|
+| `eval/results_stage3_w2a_overlap_seed42.json` | 4 模型 + W2A × seed=42（7 实例）|
+| `eval/results_stage3_w2a_overlap_seed43.json` | 同上 seed=43 |
+| `eval/results_stage3_w2a_overlap_seed44.json` | 同上 seed=44 |
+| `eval/results/where2act_predictions.npz` | W2A 47 实例原始预测（hyh 5.16 跑的）|
+
+**阶段二中期 / 阶段三 A1+A2 旧结果（保留作历史档案）**:
+
+| 文件 | 内容 |
+|---|---|
+| `eval/results_stage3_softiou.json` | 阶段三 A1 单 seed soft IoU 验证 |
+| `eval/results_stage3_seed{42..46}.json` | 阶段三 A2 47 实例 5-seed |
+| `eval/significance_stage3.json` | 47 实例 3 seed |
+| `eval/significance_stage3_5seed.json` | 47 实例 5 seed（中期最终 narrative）|
+| `eval/results_stage2_full.json` 等 | 中期 5 模型对比表 |
+
+### 四、Failure Taxonomy 产物（4 模型对比）
+
+| 模型 | CSV（逐 candidate 失败分类）| PNG 饼图 |
+|---|---|---|
+| M1 | `eval/failure_log_m1_seed42.csv` (153 candidates) | `eval/figs/failure_taxonomy_m1_seed42.png` |
+| M2 | `eval/failure_log_m2_seed42.csv` (153) | `eval/figs/failure_taxonomy_m2_seed42.png` |
+| M_full | `eval/failure_log_m_full_seed42.csv` (153) | `eval/figs/failure_taxonomy_m_full_seed42.png` |
+| **M1_composite** | `eval/failure_log_m1_composite_seed42.csv` (153) | `eval/figs/failure_taxonomy_m1_composite_seed42.png` |
+
+CSV 字段：`instance_id, candidate_idx, tier, failure_class, top1_pred_idx, top1_gt_idx, pred_top1_score, gt_top1_score, soft_iou`
+
+失败类别分布：
+- M1: hit 49% / low_confidence 47% / wrong_quadrant 4%
+- M2: hit 47% / low_confidence 51% / wrong_quadrant 2%
+- M_full: hit 47% / low_confidence 53%
+- **M1_composite**: hit 47% / low_confidence 25% / wrong_quadrant 11% / direction_flip 9% / grasp_mismatch 9% ← 唯一多元化
+
+### 五、极坐标可视化产物
+
+200 实例 P0+ 阶段（4 张）:
+
+| 文件 | 模型 × 实例 | 用途 |
+|---|---|---|
+| `viz/figs/polar_mfull_153_seed42.png` | M_full × 实例 153（中期常用 Faucet 实例）| 答辩 Slide 14-19 替换 |
+| `viz/figs/polar_mfull_100367_seed42.png` | M_full × 实例 100367（200 实例首个非 Faucet）| 多类别泛化展示 |
+| `viz/figs/polar_m1composite_153_seed42.png` | M1_composite × 实例 153 | 与 M_full 对比 |
+| `viz/figs/polar_m1composite_100367_seed42.png` | M1_composite × 实例 100367 | 与 M_full 对比 |
+
+中期 47 实例旧图（保留作历史档案，6 张）:
+
+- `viz/figs/polar_1380.png` / `polar_1380_m1_bce.png` / `polar_1380_m1_composite.png`
+- `viz/figs/polar_153.png` / `polar_153_m1_bce.png` / `polar_153_m1_composite.png`
+- `viz/figs/polar_1741.png`（已 .gitignore 忽略）
+
+### 六、新写 / 修改的代码文件清单
+
+**新写（4 个）**:
+
+| 文件 | 行数 | 用途 |
+|---|---|---|
+| `tools/populate_part_tiers_200.py` | ~250 | 200 实例 part_tiers 重算（98.6% 一致率验证） |
+| `configs/m_full_nocascade.yaml` | ~50 | 关 cascade loss 的对照实验 config |
+| `eval/eval_w2a_overlap.py` | 207 | 7 实例交集对照评测 |
+| `D:\大三下\机器人技术\` 下三份 md | n/a | 设计要点升级 + 给 hyh 通知 + 投稿 checklist |
+
+**修改（5 个）**:
+
+| 文件 | 修改内容 |
+|---|---|
+| `microreach_net/train.py` | 加 `epoch > 0` 保护防止 epoch=0 lottery |
+| `eval/metrics.py` | 新增 `cascade_diagnostics()` + 6 个新字段 + `print_cascade_diag_row()` |
+| `eval/eval_main.py` | 主表后输出 cascade 诊断表 |
+| `viz/reachability_heatmap.py` | 多头 dict 输出支持（向后兼容单头）|
+| `.gitignore` | 加 wandb/ + 阶段二遗留文件 |
+
+### 七、文档产物清单
+
+| 路径 | 类型 | 内容 |
+|---|---|---|
+| `docs/progress_log.md` | 进度日志 | 含 P0+ Step 1-8 完整中文章节 + 本"完整纪要" |
+| `docs/ai_tool_usage.md` | 课程要求 | 中期已有 |
+| `docs/stage3_label_specification.md` | hyh 的标签规范 | hyh 6.13 写的 |
+| `D:\大三下\机器人技术\阶段三_A3_设计要点.md` | 论文级设计要点（8 个 PoV，含 Kendall/MoMaGen/Bengio/UPSNet/Lee/Tang/Cao 多论文对照）| 升级版（仓库外）|
+| `D:\大三下\机器人技术\阶段三_6.14_给hyh的进度通知.md` | 团队协作纪要 | 仓库外 |
+| `D:\大三下\机器人技术\阶段三_投稿就绪checklist.md` | 论文/答辩证据清单 + Q&A 预案 | 仓库外 |
+| `D:\大三下\机器人技术\阶段二\MicroReach_阶段二中期答辩文字稿.md` | 中期答辩文字稿 | 仓库外（5.18 已写）|
+
+### 八、阶段三 P0+ 核心数据一句话表（PPT 直接可用）
+
+**7 模型 × 3 seed × 20 instance test set / 200 instance total（160 train / 20 val / 20 test）**
+
+| 模型 | Recall@1 | Micro-mIoU | sIoUmi | cascade rate | strict eps=0 |
+|---|---|---|---|---|---|
+| M0 | 0.108±0.257 | 0.000 | 0.076 | N/A | N/A |
+| M1 (baseline) | **0.225**±0.255 | 0.006 | 0.104 | N/A | N/A |
+| M1+Focal | 0.223 | 0.070 ★ | 0.118 | N/A | N/A |
+| **M1+Composite** | 0.207 | **0.082** ★★★ | **0.122** ★ | N/A | N/A |
+| M2 | 0.215 | 0.010 | 0.097 | N/A | N/A |
+| **M_full** | 0.217 | 0.016 | 0.093 | **1.0000** ★ | **0.993** ★ |
+| M_full_nocascade | 0.214 | 0.016 | 0.093 | 1.0000 | 0.992 |
+
+**Paired t-test 关键 p 值**:
+- M0 vs M1 Recall@1: **p<0.001 ★★★**（Pose-Cond Decoder 核心创新成立）
+- M1+Composite vs M1 Micro-mIoU: **p<0.001 ★★★**（Composite Loss 显著优于 BCE）
+- M_full vs M1 Recall@1: p=0.616（多头无任务干扰）
+- M_full vs M_full_nocascade 所有指标: p > 0.5（cascade loss 冗余）
+
+### 九、阶段三 P0+ 收官状态（v2 复盘）
+
+**hyh 6.13 待办清单**:
+
+| hyh 待办 | gjw 完成 |
+|---|---|
+| 200 实例数据自检 | ✅ Step 1 |
+| 启动 M2 训练（3 seed）| ✅ Step 7 |
+| M2 vs M1 多 seed 评测 + 显著性 | ✅ Step 7+8 |
+| M_full 完整三层级联训练 | ✅ Step 2-3 |
+
+**gjw 超额完成**:
+
+| 项 | 用途 |
+|---|---|
+| Cascade Diagnostics 6 指标 | 反审稿质疑 |
+| M_full_nocascade 对照实验 | 证明 cascade loss 冗余的负面发现 |
+| 7 模型完整消融阶梯 | 论文级 ablation 标配 |
+| Where2Act 7 实例对照 | SOTA 比较 |
+| Failure taxonomy 4 模型对比 | 失败模式诊断 |
+| 极坐标可视化 4 张 | 答辩素材 |
+| 训练 bug 修复 × 2 | 工程严谨度 |
+
+**Defer 项（不在阶段三范围内）**:
+
+- Isaac Sim + MoveIt 物理闭环（`isaac_sim/` 4 个 0 字节文件，工程量 1-2 周）
+- EnvAwareAfford 基线复现（`baselines/envawareafford_wrapper.py` 0 字节，需调老 PyTorch 环境）
+- PartField backbone 消融（中期已决定 PointNet++ 路线）
+
+### 十、关机前最后核对
+
+```
+分支          : gjw
+工作区        : 干净 (nothing to commit, working tree clean)
+远程同步      : Your branch is up to date with 'origin/gjw'
+顶部 commit   : 48601df (stage3 P0+ wrap-up: extend .gitignore)
+主要产物 commit: 63b1923 (stage3 P0+ Step 8: 12 new ckpts + 7-model eval + ...)
+ckpts/        : 21 个新（含旧的双重）目录 + 12 个旧
+data/*.npz    : 200 个
+eval/results_*: 21+ 个 json（7-model / w2a-overlap / 早期 / 阶段二）
+eval/figs/    : 4 张 failure 饼图
+viz/figs/     : 4 张 P0+ 极坐标 + 6 张中期遗留
+docs/         : progress_log.md（含本完整纪要）+ ai_tool_usage / 标签规范等
+```
+
+**可以放心点 AutoDL 网页"关机"（不释放）**——下次开机磁盘上所有 ckpt 和数据都还在。
