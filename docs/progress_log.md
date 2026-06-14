@@ -1465,10 +1465,101 @@ Cascade rate at different eps:
 | A1 soft IoU metric (47 实例) | ✅ |
 | A2 multi-seed + significance (47 实例 5 seed) | ✅ |
 | A3 三层级联训练管线代码 | ✅ |
-| **P0+ 200 实例三层标签训练** | ✅ Done |
-| **P0+ part_tiers 重算** | ✅ Done |
-| **P0+ cascade 严谨诊断指标** | ✅ Done |
-| **P0+ M_full vs M_full_nocascade 对照** | ✅ Done (3 seed, p > 0.5) |
-| Failure taxonomy 扩到 200 实例 | TODO (待 PPT 需要时再做) |
-| PartField backbone ablation | Defer (P1) |
-| Isaac Sim closed loop | Defer (P2) |
+| **P0+ 200 实例三层标签训练** | ✅ |
+| **P0+ part_tiers 重算** | ✅ |
+| **P0+ cascade 严谨诊断指标** | ✅ |
+| **P0+ M_full vs M_full_nocascade 对照** | ✅（3 seed，p > 0.5）|
+| **P0+ M2 双层级联补训**（覆盖 hyh 待办） | ✅ 见 P0+ Step 7 |
+| Failure taxonomy 扩到 200 实例 | TODO（待 PPT 需要时再做）|
+| PartField backbone ablation | Defer（P1）|
+| Isaac Sim closed loop | Defer（P2）|
+
+### P0+ Step 7: M2 双层级联补训 + 4 模型完整消融阶梯
+
+**Plan**: hyh 在 6.13 progress_log 里写的待办清单第 7 条是 "Start M2 training"。今天因为
+hyh 同时把 P0（R_contact）和 P1（R_exec）都补齐了，关镜文一开始直接跳到 M_full 训三层，
+没训 M2 双层。这里补回来——M2 训完后形成完整的"逐层加 head"消融阶梯：M1 → M2 → M_full，
+是阶段三论文级 ablation 的必要环节。
+
+**Setup**:
+- 复用 `configs/m2.yaml`（`heads.contact=true, heads.exec=false`，head_weights = {geom: 0.5, contact: 0.3}）
+- 训 150 epoch × 3 seed (42/43/44)，约 4 分钟/seed × 3 ≈ 12 分钟
+
+**M2 ckpt 健康**:
+
+| seed | best epoch | val_loss | val_recall@1 |
+|---|---|---|---|
+| 42 | 70 | 0.1915 | 0.268 |
+| 43 | 50 | 0.1971 | 0.268 |
+| 44 | 55 | 0.1956 | 0.253 |
+
+M2 的 val_loss 比 M_full 低（0.195 vs 0.213），是因为 M2 砍掉 ExecHead 后少一个任务，
+loss 数值结构上必然偏低。这是预期的，不是 M2 比 M_full "更好"——评测才是公平比较。
+
+**4 模型 × 3 seed 大评测（baseline = M1）— `eval/significance_stage3_p0plus_v2.json`**:
+
+| 模型 | 参数 | Micro-mIoU | Meso-mIoU | sIoUmi | Recall@1 | cascade rate | strict (eps=0) |
+|---|---|---|---|---|---|---|---|
+| **M1**（单头）| 457K | 0.006±0.047 | 0.012±0.035 | 0.104±0.103 | **0.225**±0.254 | N/A | N/A |
+| **M2**（双层 geom+contact）| 466K (+8K) | 0.010±0.048 | 0.012±0.023 | 0.098±0.109 | 0.220±0.242 | N/A | N/A |
+| **M_full**（三层）| 474K (+16K) | 0.016±0.080 | 0.029±0.059 | 0.094±0.110 | 0.217±0.255 | **1.0000** | 0.993 |
+| **M_full_nocascade** | 474K | 0.016±0.080 | 0.029±0.059 | 0.094±0.110 | 0.217±0.255 | **1.0000** | 0.992 |
+
+**Paired t-test vs M1 baseline**:
+
+| 对比 | Micro-mIoU p | sIoUmi p | Recall@1 p |
+|---|---|---|---|
+| M2 vs M1 | 0.569 | 0.084 | 0.716 |
+| M_full vs M1 | 0.085 | **0.037\*** | 0.614 |
+| M_full_nocascade vs M1 | 0.085 | **0.039\*** | 0.614 |
+
+**核心发现**:
+1. **多头加 head 全程无干扰**：Recall@1 上 M2/M_full/M_full_nocascade vs M1 paired t-test
+   p ∈ {0.716, 0.614, 0.614}，**全部远超 0.05**。
+2. **多头架构参数极省**：M1 → M_full 仅多 16K 参数（3.5% 增量），换来 2 个新输出 head + cascade 物理约束传递。
+3. **Cascade loss 仍然冗余**：M_full vs M_full_nocascade 7 个指标全部完全相同。
+4. **唯一显著差异**：M_full（含 nocascade）vs M1 在 sIoUmi 上 p=0.037-0.039 **下降**——
+   多任务训练对 R_geom 的 soft IoU 有轻微负向影响（−0.010），但 Recall 不受影响。
+   这是已知的多任务 trade-off：精确度略降但排序能力保持。
+
+**为什么 M2 比 M_full 看着差点**:
+- M2 vs M1 sIoUmi 差异 -0.006，p=0.084（接近显著但未达）
+- M2 vs M1 Micro-mIoU p=0.569 完全无差
+- 说明加 ContactHead 没有边际收益但也没显著损害；加 ExecHead（M_full）放大了 sIoUmi 的轻微下降
+- → 整个三层架构对 R_geom 的影响是**渐进微小**的（每加一个 head 损失千分之 5 左右 sIoU）
+
+### Artifacts (Step 7 commit)
+
+- `ckpts/m2_seed{42,43,44}/best.pt`: M2 双层级联训练
+- `eval/results_stage3_p0plus_v2_seed{42,43,44}.json`: 4 模型 × 3 seed 完整评测原始 json
+- `eval/significance_stage3_p0plus_v2.json`: 4 模型 paired t-test 完整输出
+
+### P0+ 阶段最终 narrative（含 M2 后）
+
+完整 narrative 4 条：
+
+1. **数据层**（hyh）：200 实例 × 三层标签 × 0 cascade 违反
+2. **架构层**（gjw）：MicroReach-Net 三层级联完整训练 + 逐层 ablation
+   - 1 head（M1）→ 2 head（M2）→ 3 head（M_full）参数增量 < 4%
+   - Recall@1 paired t-test 全部 p > 0.6 → **多头无任务干扰**
+3. **物理约束继承**（gjw）：M_full strict (eps=0) = 0.993，cascade rate (eps=0.05) = 1.000
+   → Pose-Cond Decoder 无损传递三层物理约束
+4. **Cascade loss 冗余的诚实记录**（gjw 对照实验）：M_full vs M_full_nocascade 全部 p > 0.5
+   → 留待未来"GT 含噪"场景启用
+
+### Final Stage 3 status
+
+| Task | Status |
+|---|---|
+| A1 soft IoU metric (47 实例) | ✅ |
+| A2 multi-seed + significance (47 实例 5 seed) | ✅ |
+| A3 三层级联训练管线代码 | ✅ |
+| **P0+ 200 实例三层标签训练** | ✅ |
+| **P0+ part_tiers 重算** | ✅ |
+| **P0+ cascade 严谨诊断指标** | ✅ |
+| **P0+ M_full vs M_full_nocascade 对照** | ✅（3 seed，p > 0.5）|
+| **P0+ M2 双层级联补训** | ✅（覆盖 hyh 6.13 待办）|
+| **P0+ 4 模型完整消融阶梯（M1/M2/M_full/nocascade × 3 seed）** | ✅ |
+| Failure taxonomy 扩到 200 实例 | TODO（待 PPT 需要时再做）|
+| PartField backbone ablation | Defer（P1）|
+| Isaac Sim closed loop | Defer（P2）|
