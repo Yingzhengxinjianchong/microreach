@@ -1,0 +1,47 @@
+# M_full_nocascade: 阶段三 P0+ 严谨对照实验
+#
+# 目的：验证 cascade_consistency 一致性正则在三层级联训练里是否真的有效。
+#
+# 设计：与 m_full.yaml 完全一致，唯一区别是 cascade_consistency=false
+#       —— 只跑三头 BCE，没有 cascade loss 正则项。
+#
+# 期望结果（三种可能）：
+#   A. nocascade 的 cascade rate 暴跌（→ 0.6-0.9）→ cascade loss 是 narrative 核心
+#   B. nocascade 的 cascade rate 仍 ≥ 0.95             → GT 数据本身让约束自然满足，
+#                                                         cascade loss 冗余，narrative 改 "多头无干扰"
+#   C. 中间情形 0.85-0.95                             → cascade loss 提供边际增益
+
+_base_: default.yaml
+
+variant: m_full_nocascade
+
+model:
+  use_pose_decoder: true
+  heads:
+    geom:    true
+    contact: true
+    exec:    true
+
+target_mode: per_query
+
+data:
+  load_contact: true
+  load_exec:    true
+
+loss:
+  type: bce
+  head_weights:
+    geom:    0.4
+    contact: 0.3
+    exec:    0.3
+  cascade_consistency: false       # ← 关键对照：关掉 cascade 约束正则
+  cascade_mu:          0.0
+  cascade_mu_warmup_epochs: 50
+
+train:
+  epochs: 150
+  seed: 42
+  ckpt_dir: ckpts/m_full_nocascade_seed42
+
+wandb:
+  run_name: gjw_m_full_nocascade_seed42
