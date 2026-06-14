@@ -588,7 +588,12 @@ def main():
                 import wandb
                 wandb.log({**val_stat, "epoch": epoch})
             cur_val_loss = val_stat["val_loss"]
-            if cur_val_loss < best_val_loss:
+            # 阶段三 P3 严谨修复：禁止 epoch=0 被选为 best.pt。
+            # 原因：M0 (per_point_mean) 模式下，随机初始化网络的 sigmoid 输出 ≈ 0.5，
+            # 偶然让 val_loss 比训练几个 epoch 之后还低（M0 学的 R_geom 均值 ≈ 0.155
+            # 反而推 sigmoid 远离 0.5），导致 best.pt 永远停在未训练的 epoch=0。
+            # 之前 6.13 M0 训练已经踩过这个坑（与 5 月 22 日 bugfix 是同一类问题）。
+            if epoch > 0 and cur_val_loss < best_val_loss:
                 best_val_loss = cur_val_loss
                 torch.save(
                     {"model": model.state_dict(), "cfg": cfg, "epoch": epoch,
@@ -598,6 +603,9 @@ def main():
                 print(f"  [ckpt] best.pt updated (val_loss={best_val_loss:.4f}, "
                       f"val_iou={val_stat['val_iou@0.5']:.4f}, "
                       f"val_recall@1={val_stat['val_recall@1']})")
+            elif epoch == 0:
+                # 仍保存一个 epoch=0 ckpt 作为初始 baseline，但不计入 best
+                print(f"  [ckpt] epoch=0 不计入 best.pt（避免随机初始化干扰）")
 
         # 定期 ckpt
         if (epoch + 1) % cfg["train"]["ckpt_every_epoch"] == 0:
