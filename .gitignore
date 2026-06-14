@@ -46,3 +46,13 @@ assets/franka/sciurus17_description/
 
 # Local backup generated before patching part_tiers
 data/npz_before_part_tiers/
+
+# Stage 3 P0+ collateral (6.14): 阶段二中期临时文件 + W&B 本地缓存
+# 这些不该进 git history（W&B 走在线同步；阶段二临时文件没用了）
+wandb/
+eval/results_stage2_with_tiers.json
+viz/figs/polar_1741.png
+
+# 本地手工 ckpt 备份目录（之前 rebase 时挪过来的，不该 push）
+ckpts_local_backup/
+_tmp_pulled_*/
