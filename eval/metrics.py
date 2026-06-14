@@ -283,6 +283,75 @@ def cascade_consistency_rate(
     return float((c1 + c2) / 2.0)
 
 
+def cascade_diagnostics(
+    pred_geom:    Optional[np.ndarray],
+    pred_contact: Optional[np.ndarray],
+    pred_exec:    Optional[np.ndarray],
+    gt_geom:      Optional[np.ndarray] = None,
+    gt_contact:   Optional[np.ndarray] = None,
+    gt_exec:      Optional[np.ndarray] = None,
+    eps:          float = CASCADE_EPS,
+    severe_thresh: float = 0.1,
+) -> Dict[str, Optional[float]]:
+    """
+    阶段三严谨诊断：把 Cascade Consistency Rate 拆成多个独立指标，
+    回答审稿人三个典型质疑：
+      Q1 "rate=1.0 是不是因为 GT 本身就满足约束？" → gt_cascade_rate
+      Q2 "rate=1.0 是不是 eps 容差给兜底的？"        → cascade_strict_rate (eps=0)
+      Q3 "rate=1.0 模型有没有真增益？"              → cascade_gain = pred - gt
+
+    Returns:
+        dict 含以下 key（缺失字段对应 value=None）：
+          gt_cascade_rate          : GT 中满足 cascade 的比例（数据自身水平）
+          pred_cascade_rate        : pred 中满足 cascade 的比例（= 旧 rate）
+          cascade_gain             : pred - gt（模型超过数据的纯增益）
+          cascade_strict_rate      : pred 严格满足（eps=0），反 eps 质疑
+          violation_magnitude      : pred 平均违反幅度（ReLU(c-g) + ReLU(e-c)）/ 2
+          severe_violation_rate    : pred 严重违反（差值 > severe_thresh）的比例
+    """
+    out: Dict[str, Optional[float]] = {
+        "gt_cascade_rate":          None,
+        "pred_cascade_rate":        None,
+        "cascade_gain":             None,
+        "cascade_strict_rate":      None,
+        "violation_magnitude":      None,
+        "severe_violation_rate":    None,
+    }
+
+    # pred 三层都有才能算 pred 系列指标
+    if pred_contact is not None and pred_exec is not None and pred_geom is not None:
+        # 旧 rate (eps 默认)
+        c1 = (pred_contact <= pred_geom + eps).astype(float).mean()
+        c2 = (pred_exec    <= pred_contact + eps).astype(float).mean()
+        out["pred_cascade_rate"] = float((c1 + c2) / 2.0)
+
+        # eps=0 严格 rate
+        c1s = (pred_contact <= pred_geom).astype(float).mean()
+        c2s = (pred_exec    <= pred_contact).astype(float).mean()
+        out["cascade_strict_rate"] = float((c1s + c2s) / 2.0)
+
+        # 平均违反幅度（违反方向的 ReLU 平均）
+        v1 = np.maximum(0.0, pred_contact - pred_geom).mean()
+        v2 = np.maximum(0.0, pred_exec - pred_contact).mean()
+        out["violation_magnitude"] = float((v1 + v2) / 2.0)
+
+        # 严重违反率（diff > severe_thresh）
+        s1 = ((pred_contact - pred_geom) > severe_thresh).astype(float).mean()
+        s2 = ((pred_exec - pred_contact) > severe_thresh).astype(float).mean()
+        out["severe_violation_rate"] = float((s1 + s2) / 2.0)
+
+    # GT 三层都有才能算 gt cascade rate + gain
+    if gt_contact is not None and gt_exec is not None and gt_geom is not None:
+        g1 = (gt_contact <= gt_geom + eps).astype(float).mean()
+        g2 = (gt_exec    <= gt_contact + eps).astype(float).mean()
+        out["gt_cascade_rate"] = float((g1 + g2) / 2.0)
+
+        if out["pred_cascade_rate"] is not None:
+            out["cascade_gain"] = out["pred_cascade_rate"] - out["gt_cascade_rate"]
+
+    return out
+
+
 def sim_exec_success(
     isaac_results: Optional[dict],
 ) -> Optional[float]:
@@ -328,6 +397,13 @@ class InstanceMetrics:
     micro_soft_iou:           Optional[float] = None
     meso_soft_iou:            Optional[float] = None
     macro_soft_iou:           Optional[float] = None
+    # 阶段三 P0+ 严谨诊断（拆分 cascade rate）：
+    gt_cascade_rate:          Optional[float] = None
+    pred_cascade_rate:        Optional[float] = None
+    cascade_gain:             Optional[float] = None
+    cascade_strict_rate:      Optional[float] = None
+    violation_magnitude:      Optional[float] = None
+    severe_violation_rate:    Optional[float] = None
 
     def to_dict(self) -> dict:
         return {k: v for k, v in self.__dict__.items()}
@@ -399,6 +475,12 @@ def evaluate_instance(
     s_meso  = soft_iou(pred_geom, gt_geom, meso_mask)  if meso_mask.any()  else None
     s_macro = soft_iou(pred_geom, gt_geom, macro_mask) if macro_mask.any() else None
 
+    # 阶段三 P0+ 严谨诊断：拆 cascade 为 GT/PRED/gain/strict/violation
+    cdiag = cascade_diagnostics(
+        pred_geom=pred_geom, pred_contact=pred_contact, pred_exec=pred_exec,
+        gt_geom=gt_geom,     gt_contact=gt_contact,     gt_exec=gt_exec,
+    )
+
     return InstanceMetrics(
         instance_id              = instance_id,
         micro_miou               = m_micro,
@@ -411,6 +493,12 @@ def evaluate_instance(
         micro_soft_iou           = s_micro,
         meso_soft_iou            = s_meso,
         macro_soft_iou           = s_macro,
+        gt_cascade_rate          = cdiag["gt_cascade_rate"],
+        pred_cascade_rate        = cdiag["pred_cascade_rate"],
+        cascade_gain             = cdiag["cascade_gain"],
+        cascade_strict_rate      = cdiag["cascade_strict_rate"],
+        violation_magnitude      = cdiag["violation_magnitude"],
+        severe_violation_rate    = cdiag["severe_violation_rate"],
     )
 
 
@@ -433,6 +521,13 @@ class DatasetMetrics:
     micro_soft_iou:           Optional[float] = None
     meso_soft_iou:            Optional[float] = None
     macro_soft_iou:           Optional[float] = None
+    # 阶段三 P0+ 严谨诊断
+    gt_cascade_rate:          Optional[float] = None
+    pred_cascade_rate:        Optional[float] = None
+    cascade_gain:             Optional[float] = None
+    cascade_strict_rate:      Optional[float] = None
+    violation_magnitude:      Optional[float] = None
+    severe_violation_rate:    Optional[float] = None
 
     def to_dict(self) -> dict:
         return {k: (round(v, 4) if isinstance(v, float) else v)
@@ -450,6 +545,18 @@ class DatasetMetrics:
               f"{fmt(self.pose_aware_recall_at_5)} | "
               f"{fmt(self.cascade_consistency_rate)} | "
               f"{fmt(self.sim_exec_success)}")
+
+    def print_cascade_diag_row(self, method_name: str) -> None:
+        """打印 cascade 严谨诊断列（独立一行，避免主表过宽）。"""
+        def fmt(v):
+            return f"{v:+.4f}" if isinstance(v, float) else "  N/A  "
+        print(f"  {method_name:20s} | "
+              f"gtR={fmt(self.gt_cascade_rate)} | "
+              f"predR={fmt(self.pred_cascade_rate)} | "
+              f"gain={fmt(self.cascade_gain)} | "
+              f"strict={fmt(self.cascade_strict_rate)} | "
+              f"viol={fmt(self.violation_magnitude)} | "
+              f"severe={fmt(self.severe_violation_rate)}")
 
 
 def evaluate_dataset(
@@ -481,6 +588,13 @@ def evaluate_dataset(
         micro_soft_iou           = _mean("micro_soft_iou"),
         meso_soft_iou            = _mean("meso_soft_iou"),
         macro_soft_iou           = _mean("macro_soft_iou"),
+        # 阶段三 P0+ 严谨诊断
+        gt_cascade_rate          = _mean("gt_cascade_rate"),
+        pred_cascade_rate        = _mean("pred_cascade_rate"),
+        cascade_gain             = _mean("cascade_gain"),
+        cascade_strict_rate      = _mean("cascade_strict_rate"),
+        violation_magnitude      = _mean("violation_magnitude"),
+        severe_violation_rate    = _mean("severe_violation_rate"),
     )
 
 

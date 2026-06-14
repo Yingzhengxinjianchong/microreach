@@ -1,0 +1,265 @@
+{
+  "inputs": [
+    "eval/results_stage3_p0plus_seed42.json",
+    "eval/results_stage3_p0plus_seed43.json",
+    "eval/results_stage3_p0plus_seed44.json"
+  ],
+  "baseline": "m1",
+  "n_variants": 3,
+  "mean_std": {
+    "micro_miou": {
+      "m1": {
+        "mean": 0.006060606059228649,
+        "std": 0.04694525267063265,
+        "n": 60
+      },
+      "m_full": {
+        "mean": 0.016077441073833878,
+        "std": 0.08002580857487182,
+        "n": 60
+      },
+      "m_full_nocascade": {
+        "mean": 0.016077441073833878,
+        "std": 0.08002580857487182,
+        "n": 60
+      }
+    },
+    "meso_miou": {
+      "m1": {
+        "mean": 0.011695906426592798,
+        "std": 0.0350877192797784,
+        "n": 9
+      },
+      "m_full": {
+        "mean": 0.029239766066481994,
+        "std": 0.05949412262768088,
+        "n": 9
+      },
+      "m_full_nocascade": {
+        "mean": 0.029239766066481994,
+        "std": 0.05949412262768088,
+        "n": 9
+      }
+    },
+    "macro_miou": {
+      "m1": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n": 6
+      },
+      "m_full": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n": 6
+      },
+      "m_full_nocascade": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n": 6
+      }
+    },
+    "micro_soft_iou": {
+      "m1": {
+        "mean": 0.10390456220550774,
+        "std": 0.1024748609355279,
+        "n": 48
+      },
+      "m_full": {
+        "mean": 0.09375204749807227,
+        "std": 0.1102241289916209,
+        "n": 48
+      },
+      "m_full_nocascade": {
+        "mean": 0.09365072559823766,
+        "std": 0.11045589192916758,
+        "n": 48
+      }
+    },
+    "meso_soft_iou": {
+      "m1": {
+        "mean": 0.2156661992516116,
+        "std": 0.15175657915875876,
+        "n": 9
+      },
+      "m_full": {
+        "mean": 0.21245010242042678,
+        "std": 0.1561000173223961,
+        "n": 9
+      },
+      "m_full_nocascade": {
+        "mean": 0.21428848611992424,
+        "std": 0.15586547045322424,
+        "n": 9
+      }
+    },
+    "macro_soft_iou": {
+      "m1": {
+        "mean": 0.011876921852798728,
+        "std": 0.013551737157504119,
+        "n": 6
+      },
+      "m_full": {
+        "mean": 0.010615329077553212,
+        "std": 0.011810896637516619,
+        "n": 6
+      },
+      "m_full_nocascade": {
+        "mean": 0.011376626293470448,
+        "std": 0.012532535822726334,
+        "n": 6
+      }
+    },
+    "pose_aware_recall_at_1": {
+      "m1": {
+        "mean": 0.22006944444444446,
+        "std": 0.2567812538472576,
+        "n": 60
+      },
+      "m_full": {
+        "mean": 0.22020833333333334,
+        "std": 0.25366757170562465,
+        "n": 60
+      },
+      "m_full_nocascade": {
+        "mean": 0.21687499999999998,
+        "std": 0.2552467614905475,
+        "n": 60
+      }
+    },
+    "pose_aware_recall_at_5": {
+      "m1": {
+        "mean": 0.3558333333333333,
+        "std": 0.27776410041656935,
+        "n": 60
+      },
+      "m_full": {
+        "mean": 0.3558333333333333,
+        "std": 0.27776410041656935,
+        "n": 60
+      },
+      "m_full_nocascade": {
+        "mean": 0.3558333333333333,
+        "std": 0.27776410041656935,
+        "n": 60
+      }
+    }
+  },
+  "pairwise_vs_baseline": {
+    "m_full": {
+      "micro_miou": {
+        "n_pairs": 60,
+        "mean_diff": 0.010016835014605228,
+        "t_stat": 1.7534645122806687,
+        "p_value": 0.08471605797930899,
+        "stars": ""
+      },
+      "meso_miou": {
+        "n_pairs": 9,
+        "mean_diff": 0.017543859639889196,
+        "t_stat": 1.0,
+        "p_value": 0.34659350708733416,
+        "stars": ""
+      },
+      "macro_miou": {
+        "n_pairs": 6,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "micro_soft_iou": {
+        "n_pairs": 48,
+        "mean_diff": -0.01015251470743549,
+        "t_stat": -2.1197615483298264,
+        "p_value": 0.03933562642567644,
+        "stars": "*"
+      },
+      "meso_soft_iou": {
+        "n_pairs": 9,
+        "mean_diff": -0.0032160968311848092,
+        "t_stat": -0.32707787266592847,
+        "p_value": 0.7520030147628163,
+        "stars": ""
+      },
+      "macro_soft_iou": {
+        "n_pairs": 6,
+        "mean_diff": -0.0012615927752455177,
+        "t_stat": -1.3220977812490091,
+        "p_value": 0.24338636767608715,
+        "stars": ""
+      },
+      "pose_aware_recall_at_1": {
+        "n_pairs": 60,
+        "mean_diff": 0.00013888888888888932,
+        "t_stat": 0.009251445205282186,
+        "p_value": 0.9926497315733103,
+        "stars": ""
+      },
+      "pose_aware_recall_at_5": {
+        "n_pairs": 60,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      }
+    },
+    "m_full_nocascade": {
+      "micro_miou": {
+        "n_pairs": 60,
+        "mean_diff": 0.010016835014605228,
+        "t_stat": 1.7534645122806687,
+        "p_value": 0.08471605797930899,
+        "stars": ""
+      },
+      "meso_miou": {
+        "n_pairs": 9,
+        "mean_diff": 0.017543859639889196,
+        "t_stat": 1.0,
+        "p_value": 0.34659350708733416,
+        "stars": ""
+      },
+      "macro_miou": {
+        "n_pairs": 6,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      },
+      "micro_soft_iou": {
+        "n_pairs": 48,
+        "mean_diff": -0.010253836607270105,
+        "t_stat": -2.1872955967810292,
+        "p_value": 0.03373073977799915,
+        "stars": "*"
+      },
+      "meso_soft_iou": {
+        "n_pairs": 9,
+        "mean_diff": -0.0013777131316873735,
+        "t_stat": -0.1471607709244857,
+        "p_value": 0.8866462396891996,
+        "stars": ""
+      },
+      "macro_soft_iou": {
+        "n_pairs": 6,
+        "mean_diff": -0.0005002955593282829,
+        "t_stat": -0.2870678626601158,
+        "p_value": 0.7855766543888503,
+        "stars": ""
+      },
+      "pose_aware_recall_at_1": {
+        "n_pairs": 60,
+        "mean_diff": -0.0031944444444444433,
+        "t_stat": -0.2184145892936285,
+        "p_value": 0.8278598319604743,
+        "stars": ""
+      },
+      "pose_aware_recall_at_5": {
+        "n_pairs": 60,
+        "mean_diff": 0.0,
+        "t_stat": NaN,
+        "p_value": NaN,
+        "stars": ""
+      }
+    }
+  }
+}

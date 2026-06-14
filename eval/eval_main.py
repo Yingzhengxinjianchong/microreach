@@ -421,6 +421,29 @@ def main():
 
     print("  " + "-" * 116)
 
+    # 阶段三 P0+: 打印 cascade 严谨诊断表（独立一段）
+    cascade_rows = [(name, entry["dataset"]) for name, entry in results.items()
+                    if entry["dataset"].get("pred_cascade_rate") is not None]
+    if cascade_rows:
+        print()
+        print("  Cascade Diagnostics（拆分 GT 沾光 / PRED 严谨 / 模型增益 / 严格判定 / 违反幅度）")
+        print("  " + "-" * 140)
+        print(f"  {'method':20s} | {'gtR':9s} | {'predR':9s} | {'gain':9s} | {'strict':9s} | {'viol':9s} | {'severe':9s}")
+        print("  " + "-" * 140)
+        def _fmt(v):
+            return f"{v:+.4f}" if isinstance(v, float) else "  N/A   "
+        for name, dsd in cascade_rows:
+            print(f"  {name:20s} | "
+                  f"{_fmt(dsd.get('gt_cascade_rate')):9s} | "
+                  f"{_fmt(dsd.get('pred_cascade_rate')):9s} | "
+                  f"{_fmt(dsd.get('cascade_gain')):9s} | "
+                  f"{_fmt(dsd.get('cascade_strict_rate')):9s} | "
+                  f"{_fmt(dsd.get('violation_magnitude')):9s} | "
+                  f"{_fmt(dsd.get('severe_violation_rate')):9s}")
+        print("  " + "-" * 140)
+        print("  gtR=数据自身满足率, predR=模型预测满足率, gain=predR-gtR, strict=eps=0 严格率, "
+              "viol=平均违反幅度, severe=违反>0.1 的比例")
+
     if args.json_out:
         out_path = Path(args.json_out)
         out_path.parent.mkdir(parents=True, exist_ok=True)

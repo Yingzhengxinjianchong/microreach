@@ -78,7 +78,10 @@ def predict_one(
         pc = pc[:, idx]
 
     if model.use_pose_decoder:
-        logits = model(pc, cp, q)           # (1, M, K)
+        logits = model(pc, cp, q)           # 单头: (1, M, K) | 多头: dict
+        # 阶段三：多头模型（M2 / M_full）forward 返回 dict，需要取 geom 头
+        if isinstance(logits, dict):
+            logits = logits["geom"]
         pred = torch.sigmoid(logits)
     else:
         logits = model(pc, cp)              # (1, M)
